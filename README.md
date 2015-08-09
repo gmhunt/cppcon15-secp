@@ -1,2 +1,2 @@
-# cppcon15-secp
-CppCon 2015 - Secure C++ Programming
+# CppCon 2015 - Secure C++ Programming
+
