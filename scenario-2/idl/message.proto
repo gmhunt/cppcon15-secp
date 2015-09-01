@@ -1,0 +1,67 @@
+/**
+ * Scenario 2 Message IDL
+ *
+ * IDL Used in Partner Fulfillment Library
+ */
+
+enum MessageType {
+    FulfillmentOrder = 1;
+    CancelFulfillmentOrder = 2;
+    FulfillmentOrderStatusRequest = 3;
+    FulfillmentOrderStatusResponse = 4;
+}
+
+message Uuid {
+    required uint64 lsb = 1;
+    required uint64 msb = 2;
+}
+
+message Time {
+    required seconds_since_epoch = 3;
+}
+
+message OrderEnvelope {
+    // We use hmac as a means to detect tampering of 
+    // the message contents. It is calculated 
+    // using shared secret as a key.
+    //
+    // The calculation takes in the following 
+    // concatenated string values:
+    //    message_type as string representation +
+    //    message_time as string in simple 
+    //         iso format (seconds since epoch) +
+    //    message as string 
+    required bytes message_hmac = 1;
+    
+    //
+    required MessageType message_type = 2;
+
+    // Time is generally unreliable but we included here.   
+    // It is the time the message is created in UTC of
+    // the source host. Time is important for time
+    // limited hmac shared secrets externally distributed.
+    // NOTE: No support in this IDL for distributing keys.
+    required Time message_time = 3;
+    
+    // Base64 encoded Encrypted Message. 
+    // Default encryption algorithm AES-GCM-256.
+    optional bytes message = 4;
+}
+
+message OrderDetail {
+    // Defined in external IDL
+    optional Customer = 1;
+    // Defined in external Detail
+    optional LineItem = 2;
+}
+
+// A fulfillment Order is encrypted, then base64 encoded before
+// it is added
+message FulfillmentOrder {
+    optional Uuid source_uuid = 1;
+    optional Uuid destination_uuid = 2;
+    optional Time order_time = 3;
+    optional Uuid order_id = 4;
+    repeated OrderDetail order_details = 5;
+}
+
