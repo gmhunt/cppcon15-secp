@@ -160,9 +160,9 @@ std::string authAes256GcmEncrypt_3(const std::string& key,
                                    const std::string& iv,
                                    const std::string& plainText)
 {
-    std::vector<unsigned char> vKey(key.begin(), key.end());
-    std::vector<unsigned char> vIv(iv.begin(), iv.end());
-    std::vector<unsigned char> vPt(plainText.begin(), plainText.end());
+    std::vector<unsigned char> vKey{key.begin(), key.end()};
+    std::vector<unsigned char> vIv{iv.begin(), iv.end()};
+    std::vector<unsigned char> vPt{plainText.begin(), plainText.end()};
     std::vector<unsigned char> vTag(TAG_LEN);
     std::vector<unsigned char> vCt(vPt.size());
 
@@ -176,19 +176,17 @@ std::string authAes256GcmDecrypt_3(const std::string& key,
 {
     std::vector<unsigned char> vKey(key.begin(), key.end());
 
-    int ctextLen = cipherTextLength(combinedElements);
-    int tagLen(TAG_LEN);
-    int ivLen(IV_LEN);
-    std::vector<unsigned char> vTag(combinedElements.begin(), combinedElements.begin() + tagLen);
-    std::vector<unsigned char> vIv(combinedElements.begin() + tagLen, combinedElements.begin() + ivLen);
-    std::vector<unsigned char> vCt(combinedElements.begin() + tagLen + ivLen, combinedElements.end());
+    int ctextLen{cipherTextLength(combinedElements)};
+    int tagLen{TAG_LEN};
+    int ivLen{IV_LEN};
+    std::vector<unsigned char> vTag{combinedElements.begin(), combinedElements.begin() + tagLen};
+    std::vector<unsigned char> vIv{combinedElements.begin() + tagLen, combinedElements.begin() + ivLen};
+    std::vector<unsigned char> vCt{combinedElements.begin() + tagLen + ivLen, combinedElements.end()};
 
-    int ptextLen(ctextLen);
+    int ptextLen{ctextLen};
     std::vector<unsigned char> vPt(ptextLen);
-
     basicDecryptAesGcm256_3(vKey, vTag, vIv, vCt, vPt);
-
-    std::string plainText(vPt.begin(), vPt.end());
+    std::string plainText{vPt.begin(), vPt.end()};
     return plainText;
 }
 
