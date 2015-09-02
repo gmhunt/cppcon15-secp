@@ -2,55 +2,16 @@
 // Created by ghunt on 8/31/15.
 //
 
-//#include "aesgcm256-1.h"
+#include "aesgcm256_1.hpp"
 
 #include "openssl/aes.h"
 #include "openssl/evp.h"
 #include "openssl/rand.h"
 
-#include <string>
-#include <vector>
 
 namespace secp
 {
 
-/**
- * Method for encrypting data using AES-GCM-256 and transporting as bytes in a message
- *
- * 1. A shared secret or key of 256-bits must be available for both doing the encryption and decryption.
- *    NOTE: Key is never sent with the encrypted message.
- *
- * 2. All encryption and decryption required an initialization vector of 16-bytes (96-bits).  The iv doesn't
- *    have to be random for this algorithm but cannot be used more than once with the same key.
- * 3. Encryption produces a 16 bytes tag used for tampering detection.
- * 4. All three output elements from encryption must be concatenated together in a std::string used
- *    to set a string field in a Google protobuf message.
- *
- *    tag (16-bytes) + iv (12-bytes) + cipherText (variable)
- *
- * 5. Decryption function takes in the std::string and parses it into the tag, iv and cipher text
- *    components.
- *
- */
-
-/**
- *  Encryption function using OpenSSL
- *
- *  Algorithm AES-GCM-256
- *
- *  @param key              IN  encryption key: pointer to unsigned char array. Must be 256-bits or longer.
- *  @param iv               IN  initialization vector: pointer to unsigned char array. Must be 96-bits
- *                              in length and never, ever reused with the same key.
- *  @param plaintText       IN  pointer to unsigned char array of text that will be encrypted.
- *  @param plainTextLen     IN  length of plainText
- *  @param cipherText       OUT pointer to preallocated unsigned char array with a length at least the same
- *                              as plainTextLen.
- *  @param cipherTextLen    OUT reference to unsigned int for the finished length of cipherText.
- *  @param tag              OUT pointer to a preallocated unsigned char array of 16 bytes
- *
- *  @return                 SUCCESS == 1
- *                          FAILURE == 0
- */
 int basicEncryptAesGcm256_1(const unsigned char *key,
                             const unsigned char *iv,
                             const unsigned char *plainText,
@@ -60,7 +21,7 @@ int basicEncryptAesGcm256_1(const unsigned char *key,
                             unsigned char *tag)
 {
     int rc;
-    EVP_CIPHER_CTX *context = EVP_CIPHER_CTX_new();
+    EVP_CIPHER_CTX* context = EVP_CIPHER_CTX_new();
     EVP_EncryptInit_ex(context, EVP_aes_256_gcm(), NULL, NULL, NULL);
     EVP_EncryptInit_ex(context, NULL, NULL, key, iv);
     EVP_EncryptUpdate(context, cipherText, &cipherTextLen, plainText, plainTextLen);
@@ -80,7 +41,7 @@ int basicDecryptAesGcm256_1(const unsigned char *key,
                             int &plainTextLen)
 {
     int rc;
-    EVP_CIPHER_CTX *context = EVP_CIPHER_CTX_new();
+    EVP_CIPHER_CTX* context = EVP_CIPHER_CTX_new();
     EVP_DecryptInit_ex(context, EVP_aes_256_gcm(), NULL, NULL, NULL);
     EVP_DecryptInit_ex(context, NULL, NULL, key, iv);
 
@@ -105,13 +66,12 @@ int basicDecryptAesGcm256_1(const unsigned char *key,
  * into a std::string that can be used for
  */
 std::string combineAesGcm256EncryptedElements_1(const unsigned char *tag,
-                                                const int tagLen,
                                                 const unsigned char *iv,
-                                                const int ivLen,
                                                 const unsigned char *cipherText,
                                                 const int cipherTextLen)
 {
-
+    int tagLen(16);
+    int ivLen(12);
     std::vector<unsigned char> v(tagLen + ivLen + cipherTextLen);
     memcpy((void *) &v[0], (void *) tag, (size_t) tagLen);
     memcpy((void *) &v[tagLen], (void *) iv, (size_t) ivLen);
@@ -122,7 +82,7 @@ std::string combineAesGcm256EncryptedElements_1(const unsigned char *tag,
 
 int cipherTextLength(const std::string& combinedElements)
 {
-    return combinedElements.size() - 28; // tagLen + ivLen == 28
+    return combinedElements.size() - (16 + 12); // tagLen + ivLen == 28
 }
 
 
@@ -138,7 +98,7 @@ std::string authAes256GcmEncrypt_1(const std::string &key,
 
     int ctextLen(0);
     basicEncryptAesGcm256_1(&vKey[0], &vIv[0], &vPT[0], vPT.size(), &vCT[0], ctextLen, &vTag[0]);
-    return combineAesGcm256EncryptedElements_1(&vTag[0], vTag.size(), &vIv[0], vIv.size(), &vCT[0], vCT.size());
+    return combineAesGcm256EncryptedElements_1(&vTag[0], &vIv[0], &vCT[0], vCT.size());
 }
 
 
