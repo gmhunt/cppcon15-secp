@@ -4,10 +4,8 @@
 
 #include "aesgcm256_2.hpp"
 #include "CryptoError.hpp"
-#include "openssl/aes.h"
 #include "openssl/evp.h"
 #include "openssl/err.h"
-#include "openssl/rand.h"
 
 /**
  * Method for encrypting data using AES-GCM-256 and transporting as bytes in a message
@@ -127,26 +125,38 @@ void basicDecryptAesGcm256_3(const std::vector<unsigned char>& key,
     }
 }
 
+int cipherTextLength(const std::string& combinedElements)
+{
+    return combinedElements.size() - (TAG_LEN + IV_LEN); // tagLen + ivLen == 28
+}
 
 /**
  * Utility function that assembles the resulting components of encyption using AES-GCM-256
  * into a std::string that can be used for
  */
-std::string combineAesGcm256EncryptedElements_3(const std::vector<unsigned char>& tag,
-                                                const std::vector<unsigned char>& iv,
-                                                const std::vector<unsigned char>& cipherText)
+void composeEncryptedMessage(const std::string& tag,
+                             const std::string& iv,
+                             const std::string& cipherText,
+                             std::string& encryptedMessage)
 {
-    std::string result;
-    result.reserve(TAG_LEN + IV_LEN + cipherText.size());
-    std::copy(tag.begin(), tag.end(), std::back_inserter(result));
-    std::copy(iv.begin(), iv.end(), std::back_inserter(result));
-    std::copy(cipherText.begin(), cipherText.end(), std::back_inserter(result));
-    return result;
+    encryptedMessage.clear();
+    encryptedMessage.reserve(TAG_LEN + IV_LEN + cipherText.size());
+    std::copy(tag.begin(), tag.end(), std::back_inserter(encryptedMessage));
+    std::copy(iv.begin(), iv.end(), std::back_inserter(encryptedMessage));
+    std::copy(cipherText.begin(), cipherText.end(), std::back_inserter(encryptedMessage));
 }
 
-int cipherTextLength(const std::string& combinedElements)
+void parseEncryptedMessage(const std::string& encryptedMessage,
+                           std::string& tag,
+                           std::string& iv,
+                           std::string& cipherText)
 {
-    return combinedElements.size() - (TAG_LEN + IV_LEN); // tagLen + ivLen == 28
+    tag.clear();
+    iv.clear();
+    cipherText.clear();
+    tag.assign(encryptedMessage.begin(), encryptedMessage.begin() + TAG_LEN);
+    iv.assign(encryptedMessage.begin() + TAG_LEN, encryptedMessage.begin() + TAG_LEN + IV_LEN);
+    cipherText.assign(encryptedMessage.begin() + TAG_LEN + IV_LEN, encryptedMessage.end());
 }
 
 } // namespace null
@@ -155,10 +165,11 @@ int cipherTextLength(const std::string& combinedElements)
 namespace secp
 {
 
-
-std::string authAes256GcmEncrypt_3(const std::string& key,
-                                   const std::string& iv,
-                                   const std::string& plainText)
+void authAes256GcmEncrypt_3(const std::string& key,
+                            const std::string& iv,
+                            const std::string& plainText,
+                            std::string& tag,
+                            std::string& cipherText)
 {
     std::vector<unsigned char> vKey{key.begin(), key.end()};
     std::vector<unsigned char> vIv{iv.begin(), iv.end()};
@@ -167,28 +178,27 @@ std::string authAes256GcmEncrypt_3(const std::string& key,
     std::vector<unsigned char> vCt(vPt.size());
 
     basicEncryptAesGcm256_3(vKey, vIv, vPt, vCt, vTag);
-    return combineAesGcm256EncryptedElements_3(vTag, vIv, vCt);
+    tag.assign(vTag.begin(), vTag.end());
+    cipherText.assign(vCt.begin(), vCt.end());
 }
 
-
-std::string authAes256GcmDecrypt_3(const std::string& key,
-                                   const std::string& combinedElements)
+void authAes256GcmDecrypt_3(const std::string& key,
+                            const std::string& tag,
+                            const std::string& iv,
+                            const std::string& cipherText,
+                            std::string& plainText)
 {
     std::vector<unsigned char> vKey(key.begin(), key.end());
+    std::vector<unsigned char> vTag(tag.begin(), tag.end());
+    std::vector<unsigned char> vIv(iv.begin(), iv.end());
+    std::vector<unsigned char> vCt(cipherText.begin(), cipherText.end());
 
-    int ctextLen{cipherTextLength(combinedElements)};
-    int tagLen{TAG_LEN};
-    int ivLen{IV_LEN};
-    std::vector<unsigned char> vTag{combinedElements.begin(), combinedElements.begin() + tagLen};
-    std::vector<unsigned char> vIv{combinedElements.begin() + tagLen, combinedElements.begin() + ivLen};
-    std::vector<unsigned char> vCt{combinedElements.begin() + tagLen + ivLen, combinedElements.end()};
-
+    int ctextLen{static_cast<int>(cipherText.size())};
     int ptextLen{ctextLen};
     std::vector<unsigned char> vPt(ptextLen);
-    basicDecryptAesGcm256_3(vKey, vTag, vIv, vCt, vPt);
-    std::string plainText{vPt.begin(), vPt.end()};
-    return plainText;
-}
 
+    basicDecryptAesGcm256_3(vKey, vTag, vIv, vCt, vPt);
+    plainText.assign(vPt.begin(), vPt.end());
+}
 
 } // namespace secp
