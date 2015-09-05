@@ -9,10 +9,8 @@
 #ifndef CRYPTO_ERROR_HPP_
 #define CRYPTO_ERROR_HPP_
 
-#include <boost/format.hpp>
 #include <string>
 
-const std::string whatFormat("File: %1%:%2% - Error: %3%");
 
 namespace secp
 {
@@ -21,11 +19,11 @@ class CryptoError : public virtual std::exception
 {
 public:
     CryptoError(const char* fileName, unsigned int lineNumber, const char* message)
-        : whatString_(boost::str(boost::format(whatFormat)% fileName % lineNumber % std::string(message)))
+        : whatString_(std::string(fileName) + ":" + std::to_string(lineNumber) + " error: " + std::string(message))
     {}
 
     CryptoError(const char* fileName, unsigned int lineNumber, const std::string& message)
-        : whatString_(boost::str(boost::format(whatFormat)% fileName % lineNumber % message))
+        : whatString_(std::string(fileName) + ":" + std::to_string(lineNumber) + " error: "  + message)
     {}
 
     virtual ~CryptoError() throw()
