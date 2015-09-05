@@ -56,20 +56,6 @@ void basicEncryptAesGcm256_3(const std::vector<unsigned char>& key,
                              std::vector<unsigned char>& cipherText,
                              std::vector<unsigned char>& tag)
 {
-    size_t keyLen{key.size()};
-    if (keyLen != KEY_LEN) {
-        THROW_CRYPTO_ERROR(boost::str(boost::format(
-                lengthErrorFormat) % "key" % keyLen % KEY_LEN));
-    }
-    size_t ivLen{iv.size()};
-    if (ivLen != IV_LEN) {
-        THROW_CRYPTO_ERROR(boost::str(boost::format(
-                lengthErrorFormat) % "iv" % ivLen % IV_LEN));
-    }
-    if (!plainText.size()) {
-        THROW_CRYPTO_ERROR("Plain Text has zero length!");
-    }
-
     EVP_CIPHER_CTX context;
     EVP_CIPHER_CTX_init(&context);
 
@@ -105,25 +91,6 @@ void basicDecryptAesGcm256_3(const std::vector<unsigned char>& key,
                              const std::vector<unsigned char>& cipherText,
                              std::vector<unsigned char>& plainText)
 {
-    size_t keyLen{key.size()};
-    if (keyLen != KEY_LEN) {
-        THROW_CRYPTO_ERROR(boost::str(boost::format(
-                lengthErrorFormat) % "key" % keyLen % KEY_LEN));
-    }
-    size_t tagLen{tag.size()};
-    if (tagLen != TAG_LEN) {
-        THROW_CRYPTO_ERROR(boost::str(boost::format(
-                lengthErrorFormat) % "tag" % tagLen % TAG_LEN));
-    }
-    size_t ivLen{iv.size()};
-    if (ivLen != IV_LEN) {
-        THROW_CRYPTO_ERROR(boost::str(boost::format(
-                lengthErrorFormat) % "iv" % ivLen % IV_LEN));
-    }
-    if (!cipherText.size()) {
-        THROW_CRYPTO_ERROR("Cipher Text has zero length!");
-    }
-
     EVP_CIPHER_CTX context;
     EVP_CIPHER_CTX_init(&context);
 
@@ -206,6 +173,20 @@ void authAes256GcmEncrypt_3(const std::string& key,
                             std::string& tag,
                             std::string& cipherText)
 {
+    size_t keyLen{key.size()};
+    if (keyLen != KEY_LEN) {
+        THROW_CRYPTO_ERROR(boost::str(boost::format(
+                lengthErrorFormat) % "key" % keyLen % KEY_LEN));
+    }
+    size_t ivLen{iv.size()};
+    if (ivLen != IV_LEN) {
+        THROW_CRYPTO_ERROR(boost::str(boost::format(
+                lengthErrorFormat) % "iv" % ivLen % IV_LEN));
+    }
+    if (!plainText.size()) {
+        THROW_CRYPTO_ERROR("Plain Text has zero length!");
+    }
+
     std::vector<unsigned char> vKey{key.begin(), key.end()};
     std::vector<unsigned char> vIv{iv.begin(), iv.end()};
     std::vector<unsigned char> vPT{plainText.begin(), plainText.end()};
@@ -223,6 +204,25 @@ void authAes256GcmDecrypt_3(const std::string& key,
                             const std::string& cipherText,
                             std::string& plainText)
 {
+    size_t keyLen{key.size()};
+    if (keyLen != KEY_LEN) {
+        THROW_CRYPTO_ERROR(boost::str(boost::format(
+                lengthErrorFormat) % "key" % keyLen % KEY_LEN));
+    }
+    size_t tagLen{tag.size()};
+    if (tagLen != TAG_LEN) {
+        THROW_CRYPTO_ERROR(boost::str(boost::format(
+                lengthErrorFormat) % "tag" % tagLen % TAG_LEN));
+    }
+    size_t ivLen{iv.size()};
+    if (ivLen != IV_LEN) {
+        THROW_CRYPTO_ERROR(boost::str(boost::format(
+                lengthErrorFormat) % "iv" % ivLen % IV_LEN));
+    }
+    if (!cipherText.size()) {
+        THROW_CRYPTO_ERROR("Cipher Text has zero length!");
+    }
+
     std::vector<unsigned char> vKey{key.begin(), key.end()};
     std::vector<unsigned char> vTag{tag.begin(), tag.end()};
     std::vector<unsigned char> vIv{iv.begin(), iv.end()};
