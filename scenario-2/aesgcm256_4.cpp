@@ -63,18 +63,6 @@ void basicEncryptAesGcm256_4(const std::vector<unsigned char>& key,
                              std::vector<unsigned char>& cipherText,
                              std::vector<unsigned char>& tag)
 {
-    size_t keyLen{key.size()};
-    if (keyLen != KEY_LEN) {
-        THROW_CRYPTO_ERROR(lengthFormatError("key", keyLen, KEY_LEN));
-    }
-    size_t ivLen{iv.size()};
-    if (ivLen != IV_LEN) {
-        THROW_CRYPTO_ERROR(lengthFormatError("iv", ivLen, IV_LEN));
-    }
-    if (!plainText.size()) {
-        THROW_CRYPTO_ERROR("Plain Text has zero length!");
-    }
-
     EVP_CIPHER_CTX context;
     EVP_CIPHER_CTX_init(&context);
 
@@ -84,15 +72,31 @@ void basicEncryptAesGcm256_4(const std::vector<unsigned char>& key,
     if (0 == EVP_EncryptInit_ex(&context, NULL, NULL, &key[0], &iv[0])) {
         THROW_CRYPTO_ERROR(lastOpenSSLError());
     }
-
+    /**
+     * In the following statement we have a narrowing conversion to satisfy the type
+     * required for the c API of size_t -> int. Since the caller of this function verifies that
+     * the length of plainText does not exceed the max positive value of an int and this
+     * function bring private to this compilation unit we are OK with narrowing
+     * conversion.  We use an explicit cast to squelch the compile warning.
+     */
     int plainTextLen{static_cast<int>(plainText.size())};
     cipherText.clear();
+
+    /**
+     * The next line without the cast would be a harmless widening conversion of an int to size_t.
+     * We use an explicit static_cast<size_t> to silence the compile warning.
+     */
     cipherText.resize(static_cast<size_t>(plainTextLen));
     int cipherTextLen{0};
 
     if (0 == EVP_EncryptUpdate(&context, &cipherText[0], &cipherTextLen, &plainText[0], plainTextLen)) {
         THROW_CRYPTO_ERROR(lastOpenSSLError());
     }
+
+    /**
+     * The next line without the cast would be a harmless widening conversion of an int to size_t.
+     * We use an explicit static_cast<size_t> to silence the compile warning.
+     */
     if (0 == EVP_EncryptFinal_ex(&context, &cipherText[static_cast<size_t>(cipherTextLen)], &cipherTextLen)) {
         THROW_CRYPTO_ERROR(lastOpenSSLError());
     }
@@ -110,22 +114,6 @@ void basicDecryptAesGcm256_4(const std::vector<unsigned char>& key,
                              const std::vector<unsigned char>& cipherText,
                              std::vector<unsigned char>& plainText)
 {
-    size_t keyLen{key.size()};
-    if (keyLen != KEY_LEN) {
-        THROW_CRYPTO_ERROR(lengthFormatError("key", keyLen, KEY_LEN));
-    }
-    size_t tagLen{tag.size()};
-    if (tagLen != TAG_LEN) {
-        THROW_CRYPTO_ERROR(lengthFormatError("tag", tagLen, TAG_LEN));
-    }
-    size_t ivLen{iv.size()};
-    if (ivLen != IV_LEN) {
-        THROW_CRYPTO_ERROR(lengthFormatError("iv", ivLen, IV_LEN));
-    }
-    if (!cipherText.size()) {
-        THROW_CRYPTO_ERROR("Cipher Text has zero length!");
-    }
-
     EVP_CIPHER_CTX context;
     EVP_CIPHER_CTX_init(&context);
 
@@ -136,6 +124,13 @@ void basicDecryptAesGcm256_4(const std::vector<unsigned char>& key,
         THROW_CRYPTO_ERROR(lastOpenSSLError());
     }
     int workingLen{0};
+    /**
+     * In the following statement we have a narrowing conversion to satisfy the type
+     * required for the c API of size_t -> int. Since the caller of this function verifies that
+     * the length of cipherText does not exceed the max positive value of an int and this
+     * function bring private to this compilation unit we are OK with narrowing
+     * conversion.  We use an explicit cast to squelch the compile warning.
+     */
     int cipherTextLen{static_cast<int>(cipherText.size())};
     if (0 == EVP_DecryptUpdate(&context, &plainText[0], &workingLen, &cipherText[0], cipherTextLen)) {
         THROW_CRYPTO_ERROR(lastOpenSSLError());
@@ -146,6 +141,11 @@ void basicDecryptAesGcm256_4(const std::vector<unsigned char>& key,
     if (0 == EVP_CIPHER_CTX_ctrl(&context, EVP_CTRL_GCM_SET_TAG, TAG_LEN, &tagCopy[0])) {
         THROW_CRYPTO_ERROR(lastOpenSSLError());
     }
+
+    /**
+     * The next line without the cast would be a harmless widening conversion of an int to size_t.
+     * We use an explicit static_cast<size_t> to silence the compile warning.
+     */
     if (0 == EVP_DecryptFinal_ex(&context, &plainText[static_cast<size_t>(workingLen)], &workingLen)) {
         THROW_CRYPTO_ERROR(lastOpenSSLError());
     }
@@ -207,6 +207,21 @@ void authAes256GcmEncrypt_4(const std::string& key,
                             std::string& tag,
                             std::string& cipherText)
 {
+    size_t keyLen{key.length()};
+    if (keyLen != KEY_LEN) {
+        THROW_CRYPTO_ERROR(lengthFormatError("key", keyLen, KEY_LEN));
+    }
+    size_t ivLen{iv.length()};
+    if (ivLen != IV_LEN) {
+        THROW_CRYPTO_ERROR(lengthFormatError("iv", ivLen, IV_LEN));
+    }
+    size_t plainTextLen{plainText.length()};
+    if (!plainTextLen) {
+        THROW_CRYPTO_ERROR("Plain Text has zero length!");
+    } else if (plainTextLen > std::numeric_limits<int>::max()) {
+        THROW_CRYPTO_ERROR("Plain Text exceeds max length for an int!");
+    }
+
     std::vector<unsigned char> vKey{key.begin(), key.end()};
     std::vector<unsigned char> vIv{iv.begin(), iv.end()};
     std::vector<unsigned char> vPT{plainText.begin(), plainText.end()};
@@ -224,6 +239,25 @@ void authAes256GcmDecrypt_4(const std::string& key,
                             const std::string& cipherText,
                             std::string& plainText)
 {
+    size_t keyLen{key.length()};
+    if (keyLen != KEY_LEN) {
+        THROW_CRYPTO_ERROR(lengthFormatError("key", keyLen, KEY_LEN));
+    }
+    size_t tagLen{tag.length()};
+    if (tagLen != TAG_LEN) {
+        THROW_CRYPTO_ERROR(lengthFormatError("tag", tagLen, TAG_LEN));
+    }
+    size_t ivLen{iv.length()};
+    if (ivLen != IV_LEN) {
+        THROW_CRYPTO_ERROR(lengthFormatError("iv", ivLen, IV_LEN));
+    }
+    size_t cipherTextLen{cipherText.length()};
+    if (!cipherTextLen) {
+        THROW_CRYPTO_ERROR("Cipher Text has zero length!");
+    } else if (cipherTextLen > std::numeric_limits<int>::max()) {
+        THROW_CRYPTO_ERROR("Cipher Text exceeds max length for an int!");
+    }
+
     std::vector<unsigned char> vKey{key.begin(), key.end()};
     std::vector<unsigned char> vTag{tag.begin(), tag.end()};
     std::vector<unsigned char> vIv{iv.begin(), iv.end()};
