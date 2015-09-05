@@ -4,6 +4,7 @@
 
 #include "aesgcm256_2.hpp"
 #include "openssl/evp.h"
+#include <string.h>
 
 /**
  * Method for encrypting data using AES-GCM-256 and transporting as bytes in a message

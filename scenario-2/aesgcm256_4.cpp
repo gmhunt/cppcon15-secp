@@ -7,6 +7,8 @@
 #include "openssl/evp.h"
 #include "openssl/err.h"
 #include <sstream>
+#include <string.h>
+#include <limits>
 
 /**
  * Method for encrypting data using AES-GCM-256 and transporting as bytes in a message

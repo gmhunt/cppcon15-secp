@@ -2,9 +2,18 @@ message("Running CMAKE Module: ConfigureThirdparty")
 #
 # Cmake Module: ConfigureThirdparty
 #
-# This file sets up include and links paths
-# - openssl
-# - boost
+# This file sets up include and links paths.  Libs were built with the following configs:
+# - openssl 1.0.2d
+#		posix
+#   	win32
+#
+# - boost 1.58.0
+#		clang
+#			./b2 toolset=clang cxxflags="-stdlib=libc++ -std=c++11" linkflags="-stdlib=libc++ -std=c++11"
+#   	gcc
+#			./b2 toolset=gcc cxxflags=-"-std=c++11"
+#
+#
 # - chucho 
 
 # Locate platform specific OpenSSL
@@ -19,8 +28,8 @@ if(SECP_PLATFORM_POSIX)
 	set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 	set(Boost_USE_MULTITHREADED      ON)
 	set(Boost_USE_STATIC_RUNTIME    OFF)
-	set(BOOST_ROOT /usr/local/Boost_1_58_0)
-	find_package(Boost 1.58.0)
+	set(BOOST_ROOT /usr/local/boost_1_59_0)
+	find_package(Boost 1.59.0)
 	if (Boost_FOUND)
 	    include_directories(${Boost_INCLUDE_DIRS})
 	endif()

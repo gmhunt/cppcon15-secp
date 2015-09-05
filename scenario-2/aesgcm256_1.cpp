@@ -4,7 +4,7 @@
 
 #include "aesgcm256_1.hpp"
 #include "openssl/evp.h"
-
+#include <string.h>
 
 namespace secp
 {

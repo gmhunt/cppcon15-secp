@@ -7,7 +7,7 @@
 #include "CryptoError.hpp"
 #include "openssl/evp.h"
 #include "openssl/err.h"
-
+#include <string.h>
 /**
  * Method for encrypting data using AES-GCM-256 and transporting as bytes in a message
  *
