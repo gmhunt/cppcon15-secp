@@ -2,7 +2,7 @@
 // Created by ghunt on 8/31/15.
 //
 
-#include "aesgcm256_2.hpp"
+#include "aesgcm256_3.hpp"
 #include "CryptoError.hpp"
 #include "openssl/evp.h"
 #include "openssl/err.h"
@@ -45,6 +45,9 @@ std::string lastOpenSSLError()
 
 const size_t TAG_LEN(16);
 const size_t IV_LEN(12);
+const size_t KEY_LEN(32);
+
+const std::string lengthErrorFormat("Invalid %1% length: '%2%. Should be: '%3%");
 
 void basicEncryptAesGcm256_3(const std::vector<unsigned char>& key,
                              const std::vector<unsigned char>& iv,
@@ -52,10 +55,20 @@ void basicEncryptAesGcm256_3(const std::vector<unsigned char>& key,
                              std::vector<unsigned char>& cipherText,
                              std::vector<unsigned char>& tag)
 {
-    /**
-     * Using EVP_CIPHER_CTX_new() and EVP_CIPHER_CTX_free() are deprecated
-     * because the free function would leave cryptographic items in memory.
-     */
+    size_t keyLen{key.size()};
+    if (keyLen != KEY_LEN) {
+        THROW_CRYPTO_ERROR(boost::str(boost::format(
+                lengthErrorFormat) % "key" % keyLen % KEY_LEN));
+    }
+    size_t ivLen{iv.size()};
+    if (ivLen != IV_LEN) {
+        THROW_CRYPTO_ERROR(boost::str(boost::format(
+                lengthErrorFormat) % "iv" % ivLen % IV_LEN));
+    }
+    if (!plainText.size()) {
+        THROW_CRYPTO_ERROR("Plain Text has zero length!");
+    }
+
     EVP_CIPHER_CTX context;
     EVP_CIPHER_CTX_init(&context);
 
@@ -91,21 +104,34 @@ void basicDecryptAesGcm256_3(const std::vector<unsigned char>& key,
                              const std::vector<unsigned char>& cipherText,
                              std::vector<unsigned char>& plainText)
 {
-    /**
-     * Using EVP_CIPHER_CTX_new() and EVP_CIPHER_CTX_free() are deprecated
-     * because the free function would leave cryptographic items in memory.
-     */
+    size_t keyLen{key.size()};
+    if (keyLen != KEY_LEN) {
+        THROW_CRYPTO_ERROR(boost::str(boost::format(
+                lengthErrorFormat) % "key" % keyLen % KEY_LEN));
+    }
+    size_t tagLen{tag.size()};
+    if (tagLen != TAG_LEN) {
+        THROW_CRYPTO_ERROR(boost::str(boost::format(
+                lengthErrorFormat) % "tag" % tagLen % TAG_LEN));
+    }
+    size_t ivLen{iv.size()};
+    if (ivLen != IV_LEN) {
+        THROW_CRYPTO_ERROR(boost::str(boost::format(
+                lengthErrorFormat) % "iv" % ivLen % IV_LEN));
+    }
+    if (!cipherText.size()) {
+        THROW_CRYPTO_ERROR("Cipher Text has zero length!");
+    }
+
     EVP_CIPHER_CTX context;
     EVP_CIPHER_CTX_init(&context);
 
     if (0 == EVP_DecryptInit_ex(&context, EVP_aes_256_gcm(), NULL, NULL, NULL)) {
         THROW_CRYPTO_ERROR(lastOpenSSLError());
     }
-
     if (0 == EVP_DecryptInit_ex(&context, NULL, NULL, &key[0], &iv[0])) {
         THROW_CRYPTO_ERROR(lastOpenSSLError());
     }
-
     int workingLen{0};
     if (0 == EVP_DecryptUpdate(&context, &plainText[0], &workingLen, &cipherText[0], cipherText.size())) {
         THROW_CRYPTO_ERROR(lastOpenSSLError());
@@ -125,45 +151,53 @@ void basicDecryptAesGcm256_3(const std::vector<unsigned char>& key,
     }
 }
 
-int cipherTextLength(const std::string& combinedElements)
-{
-    return combinedElements.size() - (TAG_LEN + IV_LEN); // tagLen + ivLen == 28
-}
-
-/**
- * Utility function that assembles the resulting components of encyption using AES-GCM-256
- * into a std::string that can be used for
- */
-void composeEncryptedMessage(const std::string& tag,
-                             const std::string& iv,
-                             const std::string& cipherText,
-                             std::string& encryptedMessage)
-{
-    encryptedMessage.clear();
-    encryptedMessage.reserve(TAG_LEN + IV_LEN + cipherText.size());
-    std::copy(tag.begin(), tag.end(), std::back_inserter(encryptedMessage));
-    std::copy(iv.begin(), iv.end(), std::back_inserter(encryptedMessage));
-    std::copy(cipherText.begin(), cipherText.end(), std::back_inserter(encryptedMessage));
-}
-
-void parseEncryptedMessage(const std::string& encryptedMessage,
-                           std::string& tag,
-                           std::string& iv,
-                           std::string& cipherText)
-{
-    tag.clear();
-    iv.clear();
-    cipherText.clear();
-    tag.assign(encryptedMessage.begin(), encryptedMessage.begin() + TAG_LEN);
-    iv.assign(encryptedMessage.begin() + TAG_LEN, encryptedMessage.begin() + TAG_LEN + IV_LEN);
-    cipherText.assign(encryptedMessage.begin() + TAG_LEN + IV_LEN, encryptedMessage.end());
-}
-
 } // namespace null
 
 
 namespace secp
 {
+
+void composeAesGcm256EncryptedContent(const std::string& tag,
+                                      const std::string& iv,
+                                      const std::string& cipherText,
+                                      std::string& encryptedContent)
+{
+    size_t tagLen{tag.length()};
+    if (tagLen != TAG_LEN) {
+        THROW_CRYPTO_ERROR(boost::str(boost::format(
+                lengthErrorFormat) % "tag" % tagLen % TAG_LEN));
+    }
+    size_t ivLen{iv.length()};
+    if (ivLen != IV_LEN) {
+        THROW_CRYPTO_ERROR(boost::str(boost::format(
+                lengthErrorFormat) % "iv" % ivLen % IV_LEN));
+    }
+    if (!cipherText.length()) {
+        THROW_CRYPTO_ERROR("Cipher Text has zero length!");
+    }
+
+    encryptedContent.reserve(TAG_LEN + IV_LEN + cipherText.size());
+    std::copy(tag.begin(), tag.end(), std::back_inserter(encryptedContent));
+    std::copy(iv.begin(), iv.end(), std::back_inserter(encryptedContent));
+    std::copy(cipherText.begin(), cipherText.end(), std::back_inserter(encryptedContent));
+}
+
+void parseAesGcm256EncryptedContent(const std::string& encryptedContent,
+                                    std::string& tag,
+                                    std::string& iv,
+                                    std::string& cipherText)
+{
+    size_t encLen{encryptedContent.length()};
+    if (encLen < (TAG_LEN + IV_LEN)) {
+        THROW_CRYPTO_ERROR("Encrypted content is not long enough to contain required elements");
+    } else if (encLen == (TAG_LEN + IV_LEN)) {
+        THROW_CRYPTO_ERROR("Encrypted content has zero length cipher text.");
+    }
+
+    tag.assign(encryptedContent.begin(), encryptedContent.begin() + TAG_LEN);
+    iv.assign(encryptedContent.begin() + TAG_LEN, encryptedContent.begin() + TAG_LEN + IV_LEN);
+    cipherText.assign(encryptedContent.begin() + TAG_LEN + IV_LEN, encryptedContent.end());
+}
 
 void authAes256GcmEncrypt_3(const std::string& key,
                             const std::string& iv,
@@ -173,13 +207,13 @@ void authAes256GcmEncrypt_3(const std::string& key,
 {
     std::vector<unsigned char> vKey{key.begin(), key.end()};
     std::vector<unsigned char> vIv{iv.begin(), iv.end()};
-    std::vector<unsigned char> vPt{plainText.begin(), plainText.end()};
-    std::vector<unsigned char> vTag(TAG_LEN);
-    std::vector<unsigned char> vCt(vPt.size());
+    std::vector<unsigned char> vPT{plainText.begin(), plainText.end()};
+    std::vector<unsigned char> vTag;
+    std::vector<unsigned char> vCT;
 
-    basicEncryptAesGcm256_3(vKey, vIv, vPt, vCt, vTag);
+    basicEncryptAesGcm256_3(vKey, vIv, vPT, vCT, vTag);
     tag.assign(vTag.begin(), vTag.end());
-    cipherText.assign(vCt.begin(), vCt.end());
+    cipherText.assign(vCT.begin(), vCT.end());
 }
 
 void authAes256GcmDecrypt_3(const std::string& key,
@@ -188,17 +222,14 @@ void authAes256GcmDecrypt_3(const std::string& key,
                             const std::string& cipherText,
                             std::string& plainText)
 {
-    std::vector<unsigned char> vKey(key.begin(), key.end());
-    std::vector<unsigned char> vTag(tag.begin(), tag.end());
-    std::vector<unsigned char> vIv(iv.begin(), iv.end());
-    std::vector<unsigned char> vCt(cipherText.begin(), cipherText.end());
+    std::vector<unsigned char> vKey{key.begin(), key.end()};
+    std::vector<unsigned char> vTag{tag.begin(), tag.end()};
+    std::vector<unsigned char> vIv{iv.begin(), iv.end()};
+    std::vector<unsigned char> vCT{cipherText.begin(), cipherText.end()};
+    std::vector<unsigned char> vPT;
 
-    int ctextLen{static_cast<int>(cipherText.size())};
-    int ptextLen{ctextLen};
-    std::vector<unsigned char> vPt(ptextLen);
-
-    basicDecryptAesGcm256_3(vKey, vTag, vIv, vCt, vPt);
-    plainText.assign(vPt.begin(), vPt.end());
+    basicDecryptAesGcm256_3(vKey, vTag, vIv, vCT, vPT);
+    plainText.assign(vPT.begin(), vPT.end());
 }
 
 } // namespace secp

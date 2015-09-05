@@ -83,41 +83,34 @@ int cipherTextLength(const std::string& combinedElements)
 }
 
 
-void authAes256GcmEncrypt_1(const std::string& key,
-                            const std::string& iv,
-                            const std::string& ptext,
-                            std::string& tag,
-                            std::string& cipherText)
+void authAes256GcmEncrypt_1(const std::vector<unsigned char>& key,
+                            const std::vector<unsigned char>& iv,
+                            const std::vector<unsigned char>& plainText,
+                            std::vector<unsigned char>& tag,
+                            std::vector<unsigned char>& cipherText)
 {
-    std::vector<unsigned char> vKey(key.begin(), key.end());
-    std::vector<unsigned char> vIv(iv.begin(), iv.end());
-    std::vector<unsigned char> vPT(ptext.begin(), ptext.end());
-    std::vector<unsigned char> vTag(16);
-    std::vector<unsigned char> vCT(vPT.size());
+    int ptextLen = (int)plainText.size();
+    int ctextLen(ptextLen);
 
-    int ctextLen(0);
-    basicEncryptAesGcm256_1(&vKey[0], &vIv[0], &vPT[0], vPT.size(), &vCT[0], ctextLen, &vTag[0]);
-    tag.assign(vTag.begin(), vTag.end());
-    cipherText.assign(vCT.begin(), vCT.end());
+    cipherText.clear();
+    cipherText.resize(ptextLen);
+
+    basicEncryptAesGcm256_1(&key[0], &iv[0], &plainText[0], plainText.size(), &cipherText[0], ctextLen, &tag[0]);
 }
 
-void authAes256GcmDecrypt_1(const std::string& key,
-                            const std::string& tag,
-                            const std::string& iv,
-                            const std::string& cipherText,
-                            std::string& plainText)
+void authAes256GcmDecrypt_1(const std::vector<unsigned char>& key,
+                            const std::vector<unsigned char>& tag,
+                            const std::vector<unsigned char>& iv,
+                            const std::vector<unsigned char>& cipherText,
+                            std::vector<unsigned char>& plainText)
 {
-    std::vector<unsigned char> vKey(key.begin(), key.end());
-    std::vector<unsigned char> vTag(tag.begin(), tag.end());
-    std::vector<unsigned char> vIv(iv.begin(), iv.end());
-    std::vector<unsigned char> vCt(cipherText.begin(), cipherText.end());
-
     int ctextLen = (int)cipherText.size();
     int ptextLen(ctextLen);
-    std::vector<unsigned char> vPt(ptextLen);
 
-    basicDecryptAesGcm256_1(&vKey[0], &vTag[0], &vIv[0], &vCt[0], ctextLen, &vPt[0], ptextLen);
-    plainText.assign(vPt.begin(), vPt.end());
+    plainText.clear();
+    plainText.resize(ptextLen);
+
+    basicDecryptAesGcm256_1(&key[0], &tag[0], &iv[0], &cipherText[0], ctextLen, &plainText[0], ptextLen);
 }
 
 } // namespace secp

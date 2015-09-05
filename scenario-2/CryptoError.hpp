@@ -17,7 +17,6 @@ const std::string whatFormat("File: %1%:%2% - Error: %3%");
 namespace secp
 {
 
-
 class CryptoError : public virtual std::exception
 {
 public:

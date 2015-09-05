@@ -37,10 +37,13 @@ message OrderEnvelope {
     required MessageType message_type = 2;
 
     // Time is generally unreliable but we included here.   
-    // It is the time the message is created in UTC of
+    // It is the time the message is created in UTC on
     // the source host. Time is important for time
-    // limited hmac shared secrets externally distributed.
+    // limited hmac shared secrets that may be distributed
+    // Through some external process.
+    //
     // NOTE: No support in this IDL for distributing keys.
+    //
     required Time message_time = 3;
     
     // Base64 encoded Encrypted Message. 
@@ -50,9 +53,9 @@ message OrderEnvelope {
 
 message OrderDetail {
     // Defined in external IDL
-    optional Customer = 1;
+    optional Customer customer = 1;
     // Defined in external Detail
-    optional LineItem = 2;
+    optional LineItem line_item = 2;
 }
 
 // A fulfillment Order is encrypted, then base64 encoded before

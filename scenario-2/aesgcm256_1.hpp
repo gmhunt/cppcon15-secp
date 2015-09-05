@@ -101,20 +101,20 @@ int cipherTextLength(const std::string& combinedElements);
 /**
  *
  */
-void authAes256GcmEncrypt_1(const std::string& key,
-                            const std::string& iv,
-                            const std::string& plainText,
-                            std::string& tag,
-                            std::string& cipherText);
+void authAes256GcmEncrypt_1(const std::vector<unsigned char>& key,
+                            const std::vector<unsigned char>& iv,
+                            const std::vector<unsigned char>& plainText,
+                            std::vector<unsigned char>& tag,
+                            std::vector<unsigned char>& cipherText);
 
 /**
  *
  */
-void authAes256GcmDecrypt_1(const std::string& key,
-                            const std::string& tag,
-                            const std::string& iv,
-                            const std::string& cipherText,
-                            std::string& plainText);
+void authAes256GcmDecrypt_1(const std::vector<unsigned char>& key,
+                            const std::vector<unsigned char>& tag,
+                            const std::vector<unsigned char>& iv,
+                            const std::vector<unsigned char>& cipherText,
+                            std::vector<unsigned char>& plainText);
 
 }
 #endif //SCENARIO_2_AESGCM256_1_HPP_H
