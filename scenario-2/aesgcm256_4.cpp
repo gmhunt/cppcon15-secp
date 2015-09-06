@@ -5,7 +5,6 @@
 #include "aesgcm256_3.hpp"
 #include "CryptoError.hpp"
 #include "openssl/evp.h"
-#include "openssl/err.h"
 #include <sstream>
 #include <string.h>
 #include <limits>
@@ -32,7 +31,7 @@
 namespace
 {
 
-std::string lastOpenSSLError()
+std::string lastCryptoError()
 {
     unsigned long error = ERR_peek_error();
     char errorString[1024];
@@ -69,10 +68,10 @@ void basicEncryptAesGcm256_4(const std::vector<unsigned char>& key,
     EVP_CIPHER_CTX_init(&context);
 
     if (0 == EVP_EncryptInit_ex(&context, EVP_aes_256_gcm(), NULL, NULL, NULL)) {
-        THROW_CRYPTO_ERROR(lastOpenSSLError());
+        THROW_CRYPTO_ERROR(lastCryptoError());
     }
     if (0 == EVP_EncryptInit_ex(&context, NULL, NULL, &key[0], &iv[0])) {
-        THROW_CRYPTO_ERROR(lastOpenSSLError());
+        THROW_CRYPTO_ERROR(lastCryptoError());
     }
     /**
      * In the following statement we have a narrowing conversion to satisfy the type
@@ -92,7 +91,7 @@ void basicEncryptAesGcm256_4(const std::vector<unsigned char>& key,
     int cipherTextLen{0};
 
     if (0 == EVP_EncryptUpdate(&context, &cipherText[0], &cipherTextLen, &plainText[0], plainTextLen)) {
-        THROW_CRYPTO_ERROR(lastOpenSSLError());
+        THROW_CRYPTO_ERROR(lastCryptoError());
     }
 
     /**
@@ -100,13 +99,13 @@ void basicEncryptAesGcm256_4(const std::vector<unsigned char>& key,
      * We use an explicit static_cast<size_t> to silence the compile warning.
      */
     if (0 == EVP_EncryptFinal_ex(&context, &cipherText[static_cast<size_t>(cipherTextLen)], &cipherTextLen)) {
-        THROW_CRYPTO_ERROR(lastOpenSSLError());
+        THROW_CRYPTO_ERROR(lastCryptoError());
     }
     if (0 ==  EVP_CIPHER_CTX_ctrl(&context, EVP_CTRL_GCM_GET_TAG, TAG_LEN, &tag[0])) {
-        THROW_CRYPTO_ERROR(lastOpenSSLError());
+        THROW_CRYPTO_ERROR(lastCryptoError());
     }
     if (0 == EVP_CIPHER_CTX_cleanup(&context)) {
-        THROW_CRYPTO_ERROR(lastOpenSSLError());
+        THROW_CRYPTO_ERROR(lastCryptoError());
     }
 }
 
@@ -120,10 +119,10 @@ void basicDecryptAesGcm256_4(const std::vector<unsigned char>& key,
     EVP_CIPHER_CTX_init(&context);
 
     if (0 == EVP_DecryptInit_ex(&context, EVP_aes_256_gcm(), NULL, NULL, NULL)) {
-        THROW_CRYPTO_ERROR(lastOpenSSLError());
+        THROW_CRYPTO_ERROR(lastCryptoError());
     }
     if (0 == EVP_DecryptInit_ex(&context, NULL, NULL, &key[0], &iv[0])) {
-        THROW_CRYPTO_ERROR(lastOpenSSLError());
+        THROW_CRYPTO_ERROR(lastCryptoError());
     }
     int workingLen{0};
     /**
@@ -135,13 +134,13 @@ void basicDecryptAesGcm256_4(const std::vector<unsigned char>& key,
      */
     int cipherTextLen{static_cast<int>(cipherText.size())};
     if (0 == EVP_DecryptUpdate(&context, &plainText[0], &workingLen, &cipherText[0], cipherTextLen)) {
-        THROW_CRYPTO_ERROR(lastOpenSSLError());
+        THROW_CRYPTO_ERROR(lastCryptoError());
     }
 
     int plainTextLen{workingLen};
     std::vector<unsigned char> tagCopy(tag);
     if (0 == EVP_CIPHER_CTX_ctrl(&context, EVP_CTRL_GCM_SET_TAG, TAG_LEN, &tagCopy[0])) {
-        THROW_CRYPTO_ERROR(lastOpenSSLError());
+        THROW_CRYPTO_ERROR(lastCryptoError());
     }
 
     /**
@@ -149,11 +148,11 @@ void basicDecryptAesGcm256_4(const std::vector<unsigned char>& key,
      * We use an explicit static_cast<size_t> to silence the compile warning.
      */
     if (0 == EVP_DecryptFinal_ex(&context, &plainText[static_cast<size_t>(workingLen)], &workingLen)) {
-        THROW_CRYPTO_ERROR(lastOpenSSLError());
+        THROW_CRYPTO_ERROR(lastCryptoError());
     }
     plainTextLen += workingLen;
     if (0 == EVP_CIPHER_CTX_cleanup(&context)) {
-        THROW_CRYPTO_ERROR(lastOpenSSLError());
+        THROW_CRYPTO_ERROR(lastCryptoError());
     }
 }
 
@@ -203,71 +202,56 @@ void parseAesGcm256EncryptedContent(const std::string& encryptedContent,
     cipherText.assign(encryptedContent.begin() + TAG_LEN + IV_LEN, encryptedContent.end());
 }
 
-void authAes256GcmEncrypt_4(const std::string& key,
-                            const std::string& iv,
-                            const std::string& plainText,
-                            std::string& tag,
-                            std::string& cipherText)
+void authAes256GcmEncrypt_4(const std::vector<unsigned char>& key,
+                            const std::vector<unsigned char>& iv,
+                            const std::vector<unsigned char>& plainText,
+                            std::vector<unsigned char>& tag,
+                            std::vector<unsigned char>& cipherText)
 {
-    size_t keyLen{key.length()};
+    size_t keyLen{key.size()};
     if (keyLen != KEY_LEN) {
         THROW_CRYPTO_ERROR(lengthFormatError("key", keyLen, KEY_LEN));
     }
-    size_t ivLen{iv.length()};
+    size_t ivLen{iv.size()};
     if (ivLen != IV_LEN) {
         THROW_CRYPTO_ERROR(lengthFormatError("iv", ivLen, IV_LEN));
     }
-    size_t plainTextLen{plainText.length()};
+    size_t plainTextLen{plainText.size()};
     if (!plainTextLen) {
         THROW_CRYPTO_ERROR("Plain Text has zero length!");
     } else if (plainTextLen > std::numeric_limits<int>::max()) {
         THROW_CRYPTO_ERROR("Plain Text exceeds max length for an int!");
     }
 
-    std::vector<unsigned char> vKey{key.begin(), key.end()};
-    std::vector<unsigned char> vIv{iv.begin(), iv.end()};
-    std::vector<unsigned char> vPT{plainText.begin(), plainText.end()};
-    std::vector<unsigned char> vTag;
-    std::vector<unsigned char> vCT;
-
-    basicEncryptAesGcm256_4(vKey, vIv, vPT, vCT, vTag);
-    tag.assign(vTag.begin(), vTag.end());
-    cipherText.assign(vCT.begin(), vCT.end());
+    basicEncryptAesGcm256_4(key, iv, plainText, cipherText, tag);
 }
 
-void authAes256GcmDecrypt_4(const std::string& key,
-                            const std::string& tag,
-                            const std::string& iv,
-                            const std::string& cipherText,
-                            std::string& plainText)
+void authAes256GcmDecrypt_4(const std::vector<unsigned char>& key,
+                            const std::vector<unsigned char>& tag,
+                            const std::vector<unsigned char>& iv,
+                            const std::vector<unsigned char>& cipherText,
+                            std::vector<unsigned char>& plainText)
 {
-    size_t keyLen{key.length()};
+    size_t keyLen{key.max_size()};
     if (keyLen != KEY_LEN) {
         THROW_CRYPTO_ERROR(lengthFormatError("key", keyLen, KEY_LEN));
     }
-    size_t tagLen{tag.length()};
+    size_t tagLen{tag.size()};
     if (tagLen != TAG_LEN) {
         THROW_CRYPTO_ERROR(lengthFormatError("tag", tagLen, TAG_LEN));
     }
-    size_t ivLen{iv.length()};
+    size_t ivLen{iv.size()};
     if (ivLen != IV_LEN) {
         THROW_CRYPTO_ERROR(lengthFormatError("iv", ivLen, IV_LEN));
     }
-    size_t cipherTextLen{cipherText.length()};
+    size_t cipherTextLen{cipherText.size()};
     if (!cipherTextLen) {
         THROW_CRYPTO_ERROR("Cipher Text has zero length!");
     } else if (cipherTextLen > std::numeric_limits<int>::max()) {
         THROW_CRYPTO_ERROR("Cipher Text exceeds max length for an int!");
     }
 
-    std::vector<unsigned char> vKey{key.begin(), key.end()};
-    std::vector<unsigned char> vTag{tag.begin(), tag.end()};
-    std::vector<unsigned char> vIv{iv.begin(), iv.end()};
-    std::vector<unsigned char> vCT{cipherText.begin(), cipherText.end()};
-    std::vector<unsigned char> vPT;
-
-    basicDecryptAesGcm256_4(vKey, vTag, vIv, vCT, vPT);
-    plainText.assign(vPT.begin(), vPT.end());
+    basicDecryptAesGcm256_4(key, tag, iv, cipherText, plainText);
 }
 
 } // namespace secp

@@ -9,6 +9,8 @@
 #ifndef CRYPTO_ERROR_HPP_
 #define CRYPTO_ERROR_HPP_
 
+#include "openssl/err.h"
+#include <string.h>
 #include <string>
 
 
@@ -18,25 +20,23 @@ namespace secp
 class CryptoError : public virtual std::exception
 {
 public:
-    CryptoError(const char* fileName, unsigned int lineNumber, const char* message)
-        : whatString_(std::string(fileName) + ":" + std::to_string(lineNumber) + " error: " + std::string(message))
-    {}
+    CryptoError(const char* fileName, unsigned int lineNumber, const char* message);
 
-    CryptoError(const char* fileName, unsigned int lineNumber, const std::string& message)
-        : whatString_(std::string(fileName) + ":" + std::to_string(lineNumber) + " error: "  + message)
-    {}
+    CryptoError(const char* fileName, unsigned int lineNumber, const std::string& message);
 
-    virtual ~CryptoError() throw()
-    {}
+    virtual ~CryptoError() throw();
 
-    virtual const char* what() const throw ()
-    {
-        return whatString_.c_str();
-    }
+    virtual const char* what() const throw ();
 
 private:
     std::string whatString_;
 };
+
+/**
+ * returns last error from OpenSSL
+ * as a formatted string.
+ */
+std::string lastCryptoError();
 
 } // end of namespace secp
 

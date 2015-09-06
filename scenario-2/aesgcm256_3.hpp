@@ -21,17 +21,24 @@ void parseAesGcm256EncryptedContent(const std::string& encryptedMessage,
                                     std::string& iv,
                                     std::string& cipherText);
 
-void authAes256GcmEncrypt_3(const std::string& key,
-                            const std::string& iv,
-                            const std::string& plainText,
-                            std::string& tag,
-                            std::string& cipherText);
+/**
+ *
+ */
+void authAes256GcmEncrypt_3(const std::vector<unsigned char>& key,
+                            const std::vector<unsigned char>& iv,
+                            const std::vector<unsigned char>& plainText,
+                            std::vector<unsigned char>& tag,
+                            std::vector<unsigned char>& cipherText);
 
-void authAes256GcmDecrypt_3(const std::string& key,
-                            const std::string& tag,
-                            const std::string& iv,
-                            const std::string& cipherText,
-                            std::string& plainText);
+/**
+ *
+ */
+void authAes256GcmDecrypt_3(const std::vector<unsigned char>& key,
+                            const std::vector<unsigned char>& tag,
+                            const std::vector<unsigned char>& iv,
+                            const std::vector<unsigned char>& cipherText,
+                            std::vector<unsigned char>& plainText);
 
 }
+
 #endif //SCENARIO_2_AESGCM256_3_HPP_

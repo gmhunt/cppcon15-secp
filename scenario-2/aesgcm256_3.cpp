@@ -167,11 +167,11 @@ void parseAesGcm256EncryptedContent(const std::string& encryptedContent,
     cipherText.assign(encryptedContent.begin() + TAG_LEN + IV_LEN, encryptedContent.end());
 }
 
-void authAes256GcmEncrypt_3(const std::string& key,
-                            const std::string& iv,
-                            const std::string& plainText,
-                            std::string& tag,
-                            std::string& cipherText)
+void authAes256GcmEncrypt_3(const std::vector<unsigned char>& key,
+                            const std::vector<unsigned char>& iv,
+                            const std::vector<unsigned char>& plainText,
+                            std::vector<unsigned char>& tag,
+                            std::vector<unsigned char>& cipherText)
 {
     size_t keyLen{key.size()};
     if (keyLen != KEY_LEN) {
@@ -187,22 +187,14 @@ void authAes256GcmEncrypt_3(const std::string& key,
         THROW_CRYPTO_ERROR("Plain Text has zero length!");
     }
 
-    std::vector<unsigned char> vKey{key.begin(), key.end()};
-    std::vector<unsigned char> vIv{iv.begin(), iv.end()};
-    std::vector<unsigned char> vPT{plainText.begin(), plainText.end()};
-    std::vector<unsigned char> vTag;
-    std::vector<unsigned char> vCT;
-
-    basicEncryptAesGcm256_3(vKey, vIv, vPT, vCT, vTag);
-    tag.assign(vTag.begin(), vTag.end());
-    cipherText.assign(vCT.begin(), vCT.end());
+    basicEncryptAesGcm256_3(key, iv, plainText, cipherText, tag);
 }
 
-void authAes256GcmDecrypt_3(const std::string& key,
-                            const std::string& tag,
-                            const std::string& iv,
-                            const std::string& cipherText,
-                            std::string& plainText)
+void authAes256GcmDecrypt_3(const std::vector<unsigned char>& key,
+                            const std::vector<unsigned char>& tag,
+                            const std::vector<unsigned char>& iv,
+                            const std::vector<unsigned char>& cipherText,
+                            std::vector<unsigned char>& plainText)
 {
     size_t keyLen{key.size()};
     if (keyLen != KEY_LEN) {
@@ -223,14 +215,7 @@ void authAes256GcmDecrypt_3(const std::string& key,
         THROW_CRYPTO_ERROR("Cipher Text has zero length!");
     }
 
-    std::vector<unsigned char> vKey{key.begin(), key.end()};
-    std::vector<unsigned char> vTag{tag.begin(), tag.end()};
-    std::vector<unsigned char> vIv{iv.begin(), iv.end()};
-    std::vector<unsigned char> vCT{cipherText.begin(), cipherText.end()};
-    std::vector<unsigned char> vPT;
-
-    basicDecryptAesGcm256_3(vKey, vTag, vIv, vCT, vPT);
-    plainText.assign(vPT.begin(), vPT.end());
+    basicDecryptAesGcm256_3(key, tag, iv, cipherText, plainText);
 }
 
 } // namespace secp
