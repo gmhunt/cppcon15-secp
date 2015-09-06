@@ -58,7 +58,7 @@ void testGCMEncryption(const std::string& testName, const unsigned iterations, D
     std::string unevenBlock{"CAFE8730921uiod1kjd9d2188092184092184lk"};
     unsigned origPlainTextLen{(iterations * 32) + unevenBlock.length()};
 
-    origPlainText.reserve();
+    origPlainText.reserve(origPlainTextLen);
     for (unsigned i(0); i < iterations; ++i) {
         std::vector<unsigned char> element = secp::generateRandomSequence(secp::Random::SIZE_256_BITS);
         origPlainText.insert(origPlainText.end(), element.begin(), element.end());
@@ -79,7 +79,7 @@ void testGCMEncryption(const std::string& testName, const unsigned iterations, D
     std::vector<unsigned char> cipherText;
     std::vector<unsigned char> decryptPlainText;
     tester.encrypt(key, iv, origPlainText, tag, cipherText);
-    tester.decrypt(key, tag, iv, cipherText, tag, decryptPlainText);
+    tester.decrypt(key, tag, iv, cipherText, decryptPlainText);
 
     std::stringstream ssA;
     ssA << "\n### AEAD TAG............size:[" << tag.length() << "], value: " << bin2hex(tag)
@@ -95,9 +95,9 @@ void testGCMEncryption(const std::string& testName, const unsigned iterations, D
     /**
      * Check for throw on following conditions:
      * - bad key
+     * - bad tag
      * - bad iv
      * - bad cipherText
-     * - bad tag
      */
     std::vector<unsigned char> badSeq{secp::generateRandomSequence(secp::Random::SIZE_128_BITS};
     std::vector<unsigned char> badKey{key};
@@ -114,16 +114,16 @@ void testGCMEncryption(const std::string& testName, const unsigned iterations, D
 
     std::vector<unsigned char> dummyPlainText;
     BOOST_CHECK_THROW(
-            tester.decrypt(badKey, tag, iv, cipherText, tag, dummyPlainText);
+            tester.decrypt(badKey, tag, iv, cipherText, dummyPlainText);
             cap::CryptoError);
     BOOST_CHECK_THROW(
-            tester.decrypt(key, tag, badIv, cipherText, tag, dummyPlainText);
+            tester.decrypt(key, badTag, iv, cipherText, dummyPlainText);
             cap::CryptoError);
     BOOST_CHECK_THROW(
-            tester.decrypt(key, tag, iv, badCipherText, tag, dummyPlainText);
+            tester.decrypt(key, tag, badIv, cipherText, dummyPlainText);
             cap::CryptoError);
     BOOST_CHECK_THROW(
-            tester.decrypt(key, tag, iv, cipherText, badTag, dummyPlainText);
+            tester.decrypt(key, tag, iv, badCipherText, dummyPlainText);
             cap::CryptoError);
 }
 
