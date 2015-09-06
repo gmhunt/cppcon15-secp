@@ -27,7 +27,6 @@
  *
  */
 
-
 namespace secp
 {
 
@@ -50,13 +49,13 @@ namespace secp
  *  @return                 SUCCESS == 1
  *                          FAILURE == 0
  */
-int basicEncryptAesGcm256_1(const unsigned char *key,
-                            const unsigned char *iv,
-                            const unsigned char *plainText,
-                            int plainTextLen,
-                            unsigned char *cipherText,
-                            int &cipherTextLen,
-                            unsigned char *tag);
+int encryptAesGcm256_1(const unsigned char *key,
+                       const unsigned char *iv,
+                       const unsigned char *plainText,
+                       int plainTextLen,
+                       unsigned char *cipherText,
+                       int &cipherTextLen,
+                       unsigned char *tag);
 
 /**
  *  Decryption function using OpenSSL
@@ -75,46 +74,14 @@ int basicEncryptAesGcm256_1(const unsigned char *key,
  *  @return                 SUCCESS == 1
  *                          FAILURE == 0
  */
-int basicDecryptAesGcm256_1(const unsigned char *key,
-                            const unsigned char *tag,
-                            const unsigned char *iv,
-                            const unsigned char *cipherText,
-                            const int cipherTextLen,
-                            unsigned char *plainText,
-                            int &plainTextLen);
+int decryptAesGcm256_1(const unsigned char *key,
+                       const unsigned char *tag,
+                       const unsigned char *iv,
+                       const unsigned char *cipherText,
+                       const int cipherTextLen,
+                       unsigned char *plainText,
+                       int &plainTextLen);
 
-/**
- *
- */
-std::string combineAesGcm256EncryptedElements_1(const unsigned char *tag,
-                                                const int tagLen,
-                                                const unsigned char *iv,
-                                                const int ivLen,
-                                                const unsigned char *cipherText,
-                                                const int cipherTextLen);
+} // namespace secp
 
-/**
- *
- */
-int cipherTextLength(const std::string& combinedElements);
-
-/**
- *
- */
-void authAes256GcmEncrypt_1(const std::vector<unsigned char>& key,
-                            const std::vector<unsigned char>& iv,
-                            const std::vector<unsigned char>& plainText,
-                            std::vector<unsigned char>& tag,
-                            std::vector<unsigned char>& cipherText);
-
-/**
- *
- */
-void authAes256GcmDecrypt_1(const std::vector<unsigned char>& key,
-                            const std::vector<unsigned char>& tag,
-                            const std::vector<unsigned char>& iv,
-                            const std::vector<unsigned char>& cipherText,
-                            std::vector<unsigned char>& plainText);
-
-}
 #endif //SCENARIO_2_AESGCM256_1_HPP_H

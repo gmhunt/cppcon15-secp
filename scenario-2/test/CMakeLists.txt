@@ -6,7 +6,7 @@ CAP_USE_FIPS()
 ## platform independent source
 ##----------------------------------------------------------------
 SET(CRYPTO_TEST_SOURCES
-    AESEncryptTest.cpp  
+    AesGcmTest.cpp
     CertVerifyTest.cpp
     CryptoTest.cpp
     Harness.cpp
