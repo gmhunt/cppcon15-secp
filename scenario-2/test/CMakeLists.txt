@@ -29,6 +29,11 @@ target_link_libraries(crypto-test
     ${BOOST_ROOT}/lib/libboost_unit_test_framework.a
 )
 
+if(SECP_PLATFORM_LINUX)
+    target_link_libraries(crypto-test
+        dl
+    )
+endif()
 ##----------------------------------------------------------------
 ## check targets run under boost test framework
 ##----------------------------------------------------------------

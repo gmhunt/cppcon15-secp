@@ -28,7 +28,7 @@ message("Running CMAKE Module: ConfigureThirdparty")
 #   	gcc (linux)
 #           ./bootstrap.sh
 #			./bjam --disable-icu -q --prefix=/usr/local/boost_1_59_0 --without-python \
-#                  --without-log --without-mpi --toolset=clang-cxx11 link=static \
+#                  --without-log --without-mpi --toolset=gcc link=static \
 #                  threading=multi variant=release address-model=64 architecture=x86 \
 #                  -sBZIP2_SOURCE=~/build-boost/bzip2-1.0.6 \
 #                  -sZLIB_SOURCE=~/build-boost/zlib-1.2.8 \
