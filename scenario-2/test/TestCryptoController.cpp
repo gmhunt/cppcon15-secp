@@ -2,25 +2,13 @@
 #include "boost/test/unit_test.hpp"
 
 
-TestCryptoController* TestCryptoController::instance()
+std::shared_ptr<TestCryptoController> TestCryptoController::instance()
 {
     if (testCryptoController_ == nullptr) {
-        testCryptoController_ = new TestCryptoController();
+        TestCryptoController::testCryptoController_ = std::shared_ptr<TestCryptoController>(new TestCryptoController());
     }
     return testCryptoController_;
 }
 
-TestCryptoController::TestCryptoController()
-    : cryptoController_()
-{}
-
-
-void checkCrypto()
-{
-    TestCryptoController* testCryptoController = TestCryptoController::instance();
-    testCryptoController->enable();
-    BOOST_CHECK_EQUAL(testCryptoController->isEnabled(), true);
-}
-
-TestCryptoController* TestCryptoController::testCryptoController_(nullptr);
+std::shared_ptr<TestCryptoController> TestCryptoController::testCryptoController_(nullptr);
 

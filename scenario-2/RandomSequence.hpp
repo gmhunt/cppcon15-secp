@@ -21,6 +21,10 @@ enum class Random {
     SIZE_256_BITS = 256
 };
 
+unsigned byteSize(const secp::Random bits);
+
+std::string bitsAsString(const secp::Random bits);
+
 std::vector<unsigned char> generateRandomSequence(const Random bits);
 
 } // namespace secp

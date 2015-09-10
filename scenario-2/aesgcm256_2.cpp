@@ -167,7 +167,7 @@ namespace secp
 {
 
 
-void authAes256GcmEncrypt_1(const std::vector<unsigned char>& key,
+void authAes256GcmEncrypt_2(const std::vector<unsigned char>& key,
                             const std::vector<unsigned char>& iv,
                             const std::vector<unsigned char>& plainText,
                             std::vector<unsigned char>& tag,
@@ -176,6 +176,8 @@ void authAes256GcmEncrypt_1(const std::vector<unsigned char>& key,
     int ptextLen = (int)plainText.size();
     int ctextLen(ptextLen);
 
+    tag.clear();
+    tag.resize(16);
     cipherText.clear();
     cipherText.resize(ptextLen);
 

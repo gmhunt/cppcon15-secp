@@ -4,6 +4,7 @@
 #include <CryptoController.hpp>
 #include "boost/noncopyable.hpp"
 
+#include <memory>
 /**
  * This singleton is used with the test harness
  * as a wrapper around the CryptoController.
@@ -12,18 +13,15 @@
 class TestCryptoController : protected boost::noncopyable
 {
 public:
-    static TestCryptoController* instance();
+    static std::shared_ptr<TestCryptoController> instance();
 
 private:
-    TestCryptoController();
+    TestCryptoController() = default;
 
-    cap::CryptoController           cryptoController_;
+    secp::CryptoController        cryptoController_;
 
-    static TestCryptoController*    testCryptoController_;
+    static std::shared_ptr<TestCryptoController> testCryptoController_;
 
 };
-
-void checkCrypto();
-
 
 #endif /* TEST_CRYPTO_CONTROLLER_HPP_ */

@@ -11,15 +11,15 @@
 namespace secp
 {
 
-void composeAesGcm256EncryptedContent(const std::string& tag,
-                                      const std::string& iv,
-                                      const std::string& cipherText,
-                                      std::string& encryptedMessage);
+void composeAesGcm256EncryptedContent_3(const std::string& tag,
+                                        const std::string& iv,
+                                        const std::string& cipherText,
+                                        std::string& encryptedMessage);
 
-void parseAesGcm256EncryptedContent(const std::string& encryptedMessage,
-                                    std::string& tag,
-                                    std::string& iv,
-                                    std::string& cipherText);
+void parseAesGcm256EncryptedContent_3(const std::string& encryptedMessage,
+                                      std::string& tag,
+                                      std::string& iv,
+                                      std::string& cipherText);
 
 /**
  *

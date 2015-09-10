@@ -52,6 +52,9 @@ void basicEncryptAesGcm256_3(const std::vector<unsigned char>& key,
         THROW_CRYPTO_ERROR(secp::lastCryptoError());
     }
 
+    tag.clear();
+    tag.resize(TAG_LEN);
+
     int plainTextLen{static_cast<int>(plainText.size())};
     cipherText.clear();
     cipherText.resize(plainTextLen);
@@ -93,6 +96,8 @@ void basicDecryptAesGcm256_3(const std::vector<unsigned char>& key,
 
     int plainTextLen{workingLen};
     std::vector<unsigned char> tagCopy(tag);
+    plainText.clear();
+    plainText.resize(cipherText.size());
     if (0 == EVP_CIPHER_CTX_ctrl(&context, EVP_CTRL_GCM_SET_TAG, TAG_LEN, &tagCopy[0])) {
         THROW_CRYPTO_ERROR(secp::lastCryptoError());
     }
@@ -111,10 +116,10 @@ void basicDecryptAesGcm256_3(const std::vector<unsigned char>& key,
 namespace secp
 {
 
-void composeAesGcm256EncryptedContent(const std::string& tag,
-                                      const std::string& iv,
-                                      const std::string& cipherText,
-                                      std::string& encryptedContent)
+void composeAesGcm256EncryptedContent_3(const std::string& tag,
+                                        const std::string& iv,
+                                        const std::string& cipherText,
+                                        std::string& encryptedContent)
 {
     size_t tagLen{tag.length()};
     if (tagLen != TAG_LEN) {
@@ -136,10 +141,10 @@ void composeAesGcm256EncryptedContent(const std::string& tag,
     std::copy(cipherText.begin(), cipherText.end(), std::back_inserter(encryptedContent));
 }
 
-void parseAesGcm256EncryptedContent(const std::string& encryptedContent,
-                                    std::string& tag,
-                                    std::string& iv,
-                                    std::string& cipherText)
+void parseAesGcm256EncryptedContent_3(const std::string& encryptedContent,
+                                      std::string& tag,
+                                      std::string& iv,
+                                      std::string& cipherText)
 {
     size_t encLen{encryptedContent.length()};
     if (encLen < (TAG_LEN + IV_LEN)) {

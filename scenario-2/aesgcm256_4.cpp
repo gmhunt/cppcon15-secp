@@ -57,6 +57,8 @@ void basicEncryptAesGcm256_4(const std::vector<unsigned char>& key,
     if (0 == EVP_EncryptInit_ex(&context, NULL, NULL, &key[0], &iv[0])) {
         THROW_CRYPTO_ERROR(secp::lastCryptoError());
     }
+    tag.clear();
+    tag.resize(TAG_LEN);
     /**
      * In the following statement we have a narrowing conversion to satisfy the type
      * required for the c API of size_t -> int. Since the caller of this function verifies that
@@ -148,10 +150,10 @@ void basicDecryptAesGcm256_4(const std::vector<unsigned char>& key,
 namespace secp
 {
 
-void composeAesGcm256EncryptedContent(const std::string& tag,
-                                      const std::string& iv,
-                                      const std::string& cipherText,
-                                      std::string& encryptedContent)
+void composeAesGcm256EncryptedContent_4(const std::string& tag,
+                                        const std::string& iv,
+                                        const std::string& cipherText,
+                                        std::string& encryptedContent)
 {
     size_t tagLen{tag.length()};
     if (tagLen != TAG_LEN) {
@@ -171,10 +173,10 @@ void composeAesGcm256EncryptedContent(const std::string& tag,
     std::copy(cipherText.begin(), cipherText.end(), std::back_inserter(encryptedContent));
 }
 
-void parseAesGcm256EncryptedContent(const std::string& encryptedContent,
-                                    std::string& tag,
-                                    std::string& iv,
-                                    std::string& cipherText)
+void parseAesGcm256EncryptedContent_4(const std::string& encryptedContent,
+                                      std::string& tag,
+                                      std::string& iv,
+                                      std::string& cipherText)
 {
     size_t encLen{encryptedContent.length()};
     if (encLen < (TAG_LEN + IV_LEN)) {

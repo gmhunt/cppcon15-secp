@@ -81,5 +81,5 @@ message("** OpenSSL lib dir............: ${OPENSSL_LIB_DIRS}")
 message("** OPENSSL_CRYPTO_LIBRARY.....: ${OPENSSL_CRYPTO_LIBRARY}")
 message("** OPENSSL_SSL_LIBRARY........: ${OPENSSL_SSL_LIBRARY}")
 
-message("** Boost root dir.............: ${BOOST_ROOT}")
+message("** BOOST_ROOT.................: ${BOOST_ROOT}")
 

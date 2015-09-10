@@ -22,42 +22,43 @@ namespace secp
 class DemoWrapper
 {
 public:
-    virtual void encrypt(const std::vector<unsigned char> &key,
-                         const std::vector<unsigned char> &iv,
-                         const std::vector<unsigned char> &plainText,
-                         std::vector<unsigned char> &tag,
-                         std::vector<unsigned char> &cipherText) = 0;
+    virtual void encrypt(const std::vector<unsigned char>& key,
+                         const std::vector<unsigned char>& iv,
+                         const std::vector<unsigned char>& plainText,
+                         std::vector<unsigned char>& tag,
+                         std::vector<unsigned char>& cipherText) = 0;
 
-    virtual void decrypt(const std::vector<unsigned char> &key,
-                         const std::vector<unsigned char> &tag,
-                         const std::vector<unsigned char> &iv,
-                         const std::vector<unsigned char> &cipherText,
-                         std::vector<unsigned char> &plainText) = 0;
+    virtual void decrypt(const std::vector<unsigned char>& key,
+                         const std::vector<unsigned char>& tag,
+                         const std::vector<unsigned char>& iv,
+                         const std::vector<unsigned char>& cipherText,
+                         std::vector<unsigned char>& plainText) = 0;
 };
 
 class Demo1Tester : public DemoWrapper
 {
 public:
-    void encrypt(const std::vector<unsigned char> &key,
-                 const std::vector<unsigned char> &iv,
-                 const std::vector<unsigned char> &plainText,
-                 std::vector<unsigned char> &tag,
-                 std::vector<unsigned char> &cipherText)
+    void encrypt(const std::vector<unsigned char>& key,
+                 const std::vector<unsigned char>& iv,
+                 const std::vector<unsigned char>& plainText,
+                 std::vector<unsigned char>& tag,
+                 std::vector<unsigned char>& cipherText)
     {
         int ptextLen = (int)plainText.size();
         int ctextLen(ptextLen);
 
+        tag.resize(16);
         cipherText.clear();
         cipherText.resize(ptextLen);
 
         encryptAesGcm256_1(&key[0], &iv[0], &plainText[0], plainText.size(), &cipherText[0], ctextLen, &tag[0]);
     }
 
-    void decrypt(const std::vector<unsigned char> &key,
-                 const std::vector<unsigned char> &tag,
-                 const std::vector<unsigned char> &iv,
-                 const std::vector<unsigned char> &cipherText,
-                 std::vector<unsigned char> &plainText)
+    void decrypt(const std::vector<unsigned char>& key,
+                 const std::vector<unsigned char>& tag,
+                 const std::vector<unsigned char>& iv,
+                 const std::vector<unsigned char>& cipherText,
+                 std::vector<unsigned char>& plainText)
     {
         int ctextLen = (int)cipherText.size();
         int ptextLen(ctextLen);
@@ -72,66 +73,66 @@ public:
 class Demo2Tester : public DemoWrapper
 {
 public:
-    void encrypt(const std::vector<unsigned char> &key,
-                 const std::vector<unsigned char> &iv,
-                 const std::vector<unsigned char> &plainText,
-                 std::vector<unsigned char> &tag,
-                 std::vector<unsigned char> &cipherText)
+    void encrypt(const std::vector<unsigned char>& key,
+                 const std::vector<unsigned char>& iv,
+                 const std::vector<unsigned char>& plainText,
+                 std::vector<unsigned char>& tag,
+                 std::vector<unsigned char>& cipherText)
     {
-        secp::authAes256GcmEncrypt_2(key, iv, plainText, tag, cipherText);
+        authAes256GcmEncrypt_2(key, iv, plainText, tag, cipherText);
     }
 
-    void decrypt(const std::vector<unsigned char> &key,
-                 const std::vector<unsigned char> &tag,
-                 const std::vector<unsigned char> &iv,
-                 const std::vector<unsigned char> &cipherText,
-                 std::vector<unsigned char> &plainText)
+    void decrypt(const std::vector<unsigned char>& key,
+                 const std::vector<unsigned char>& tag,
+                 const std::vector<unsigned char>& iv,
+                 const std::vector<unsigned char>& cipherText,
+                 std::vector<unsigned char>& plainText)
     {
-        secp::authAes256GcmDecrypt_2(key, tag, iv, cipherText, plainText);
+        authAes256GcmDecrypt_2(key, tag, iv, cipherText, plainText);
     };
 };
 
 class Demo3Tester : public DemoWrapper
 {
 public:
-    void encrypt(const std::vector<unsigned char> &key,
-                 const std::vector<unsigned char> &iv,
-                 const std::vector<unsigned char> &plainText,
-                 std::vector<unsigned char> &tag,
-                 std::vector<unsigned char> &cipherText)
+    void encrypt(const std::vector<unsigned char>& key,
+                 const std::vector<unsigned char>& iv,
+                 const std::vector<unsigned char>& plainText,
+                 std::vector<unsigned char>& tag,
+                 std::vector<unsigned char>& cipherText)
     {
-        secp::authAes256GcmEncrypt_3(key, iv, plainText, tag, cipherText);
+        authAes256GcmEncrypt_3(key, iv, plainText, tag, cipherText);
     }
 
-    void decrypt(const std::vector<unsigned char> &key,
-                 const std::vector<unsigned char> &tag,
-                 const std::vector<unsigned char> &iv,
-                 const std::vector<unsigned char> &cipherText,
-                 std::vector<unsigned char> &plainText)
+    void decrypt(const std::vector<unsigned char>& key,
+                 const std::vector<unsigned char>& tag,
+                 const std::vector<unsigned char>& iv,
+                 const std::vector<unsigned char>& cipherText,
+                 std::vector<unsigned char>& plainText)
     {
-        secp::authAes256GcmDecrypt_3(key, tag, iv, cipherText, plainText);
+        authAes256GcmDecrypt_3(key, tag, iv, cipherText, plainText);
     };
 };
 
 class Demo4Tester : public DemoWrapper
 {
 public:
-    void encrypt(const std::vector<unsigned char> &key,
-                 const std::vector<unsigned char> &iv,
-                 const std::vector<unsigned char> &plainText,
-                 std::vector<unsigned char> &tag,
-                 std::vector<unsigned char> &cipherText)
+    void encrypt(const std::vector<unsigned char>& key,
+                 const std::vector<unsigned char>& iv,
+                 const std::vector<unsigned char>& plainText,
+                 std::vector<unsigned char>& tag,
+                 std::vector<unsigned char>& cipherText)
     {
-        secp::authAes256GcmEncrypt_4(key, iv, plainText, tag, cipherText);
+        authAes256GcmEncrypt_4(key, iv, plainText, tag, cipherText);
     }
 
-    void decrypt(const std::vector<unsigned char> &key,
-                 const std::vector<unsigned char> &tag,
-                 const std::vector<unsigned char> &iv,
-                 const std::vector<unsigned char> &cipherText,
-                 std::vector<unsigned char> &plainText)
+    void decrypt(const std::vector<unsigned char>& key,
+                 const std::vector<unsigned char>& tag,
+                 const std::vector<unsigned char>& iv,
+                 const std::vector<unsigned char>& cipherText,
+                 std::vector<unsigned char>& plainText)
     {
-        secp::authAes256GcmDecrypt_4(key, tag, iv, cipherText, plainText);
+        authAes256GcmDecrypt_4(key, tag, iv, cipherText, plainText);
     };
 };
 

@@ -15,7 +15,7 @@ namespace secp
 class CryptoController : private boost::noncopyable
 {
 public:
-	CryptoController);
+	CryptoController();
 
     virtual ~CryptoController();
 
