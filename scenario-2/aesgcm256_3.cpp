@@ -6,8 +6,7 @@
 #include "aesgcm256_3.hpp"
 #include "CryptoError.hpp"
 #include "openssl/evp.h"
-#include "openssl/err.h"
-#include <string.h>
+
 /**
  * Method for encrypting data using AES-GCM-256 and transporting as bytes in a message
  *
@@ -90,14 +89,14 @@ void basicDecryptAesGcm256_3(const std::vector<unsigned char>& key,
         THROW_CRYPTO_ERROR(secp::lastCryptoError());
     }
     int workingLen{0};
+    plainText.clear();
+    plainText.resize(cipherText.size());
     if (0 == EVP_DecryptUpdate(&context, &plainText[0], &workingLen, &cipherText[0], cipherText.size())) {
         THROW_CRYPTO_ERROR(secp::lastCryptoError());
     }
 
     int plainTextLen{workingLen};
     std::vector<unsigned char> tagCopy(tag);
-    plainText.clear();
-    plainText.resize(cipherText.size());
     if (0 == EVP_CIPHER_CTX_ctrl(&context, EVP_CTRL_GCM_SET_TAG, TAG_LEN, &tagCopy[0])) {
         THROW_CRYPTO_ERROR(secp::lastCryptoError());
     }

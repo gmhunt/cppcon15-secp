@@ -25,6 +25,7 @@ target_link_libraries(crypto-test
     aesgcm
     ${OPENSSL_CRYPTO_LIBRARY}
     ${OPENSSL_SSL_LIBRARY}
+    ${BOOST_ROOT}/lib/libboost_date_time.a
     ${BOOST_ROOT}/lib/libboost_unit_test_framework.a
 )
 

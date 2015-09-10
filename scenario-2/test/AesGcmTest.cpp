@@ -8,18 +8,13 @@
 #include "CryptoError.hpp"
 #include "RandomSequence.hpp"
 
-#include <algorithm>
-#include <chrono>
-#include <vector>
-#include <string>
-#include <sstream>
 #include <iostream>
 #include <thread>
 
 namespace
 {
 
-std::string bin2hex(const std::vector<unsigned char> &source)
+std::string bin2hex(const std::vector<unsigned char>& source)
 {
     std::string bin{source.begin(), source.end()};
     std::string hexString;
@@ -27,7 +22,7 @@ std::string bin2hex(const std::vector<unsigned char> &source)
     return hexString;
 }
 
-unsigned removeDuplicates(std::vector<std::string> &v)
+unsigned removeDuplicates(std::vector<std::string>& v)
 {
     std::sort(v.begin(), v.end());
     v.erase(std::unique(v.begin(), v.end()), v.end());
@@ -35,9 +30,15 @@ unsigned removeDuplicates(std::vector<std::string> &v)
     return v.size();
 }
 
-bool isEqualSequence(const std::vector<unsigned char> &l, std::vector<unsigned char> &r)
+bool isEqualSequence(const std::vector<unsigned char>& l, std::vector<unsigned char>& r)
 {
-    return true; //std::equal<std::vector<unsigned char>, std::vector<unsigned char>>(l.begin(), l.end(), r.begin());
+    /**
+     * Not the most efficient but works for this test.
+     */
+    std::string lhs(l.begin(), l.end());
+    std::string rhs(r.begin(), r.end());
+
+    return (lhs.compare(rhs) == 0);
 }
 
 void testGCMEncryption(const std::string &testName, const unsigned iterations, secp::DemoWrapper &tester)
@@ -76,14 +77,17 @@ void testGCMEncryption(const std::string &testName, const unsigned iterations, s
 
     std::stringstream ssA;
     ssA << "\n### AEAD TAG............size:[" << tag.size() << "], value: " << bin2hex(tag)
-    << "\n### cipher text.........size:[" << cipherText.size() << "]";
+        << "\n### cipher text.........size:[" << cipherText.size() << "]";
     ssA << "\n### decrypt plain text..size:[" << decryptPlainText.size() << "]";
     secp::log(secp::INFO, ssA.str());
 
     //  Compare decrypted to original plaintext.
     //
-//    BOOST_CHECK(isEqualSequence(decryptPlainText, origPlainText));
-
+    auto matches = isEqualSequence(decryptPlainText, origPlainText);
+    BOOST_CHECK(matches);
+    if (matches) {
+        secp::log(secp::INFO, "Success. Decrypt matches original!");
+    }
 }
 
 void testGCMEncryption4(const std::string &testName, const unsigned iterations, secp::DemoWrapper &tester)
@@ -128,7 +132,11 @@ void testGCMEncryption4(const std::string &testName, const unsigned iterations, 
 
     //  Compare decrypted to original plaintext.
     //
-//    BOOST_CHECK(isEqualSequence(decryptPlainText, origPlainText));
+    auto matches = isEqualSequence(decryptPlainText, origPlainText);
+    BOOST_CHECK(matches);
+    if (matches) {
+        secp::log(secp::INFO, "Success. Decrypt matches original!");
+    }
 
     // Check for throw on following conditions:
     // - bad key

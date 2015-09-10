@@ -2,8 +2,9 @@
 // Created by ghunt on 8/31/15.
 //
 
-#include "aesgcm256_3.hpp"
+#include "aesgcm256_4.hpp"
 #include "CryptoError.hpp"
+
 #include "openssl/evp.h"
 #include <sstream>
 #include <string.h>
@@ -111,6 +112,9 @@ void basicDecryptAesGcm256_4(const std::vector<unsigned char>& key,
         THROW_CRYPTO_ERROR(secp::lastCryptoError());
     }
     int workingLen{0};
+    plainText.clear();
+    plainText.resize(cipherText.size());
+
     /**
      * In the following statement we have a narrowing conversion to satisfy the type
      * required for the c API of size_t -> int. Since the caller of this function verifies that
@@ -220,7 +224,7 @@ void authAes256GcmDecrypt_4(const std::vector<unsigned char>& key,
                             const std::vector<unsigned char>& cipherText,
                             std::vector<unsigned char>& plainText)
 {
-    size_t keyLen{key.max_size()};
+    size_t keyLen{key.size()};
     if (keyLen != KEY_LEN) {
         THROW_CRYPTO_ERROR(lengthFormatError("key", keyLen, KEY_LEN));
     }

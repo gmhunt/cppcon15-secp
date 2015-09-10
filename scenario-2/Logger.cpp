@@ -2,7 +2,7 @@
 // Created by Gwendolyn Hunt on 9/9/15.
 //
 #include "Logger.hpp"
-#include <chrono>
+#include <boost/date_time.hpp>
 #include <iostream>
 #include <string>
 #include <thread>
@@ -23,9 +23,8 @@ const std::string INFO("INFO");
 void log(const std::string& type, const std::string& logEntry)
 {
     std::lock_guard<std::mutex> lock(logMutex);
-    auto ct  = std::chrono::system_clock::now();
-    auto ttp = std::chrono::system_clock::to_time_t(ct);
-    std::cout << std::ctime(&ttp) << " " << type << " " << logEntry << std::endl;
+    auto pt = boost::posix_time::microsec_clock::universal_time();
+    std::cout << boost::posix_time::to_iso_extended_string(pt) << " " << type << " " << logEntry << std::endl;
 }
 
 
