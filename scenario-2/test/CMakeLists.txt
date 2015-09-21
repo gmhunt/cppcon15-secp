@@ -3,13 +3,29 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/.. $
 ##----------------------------------------------------------------
 ## platform independent source
 ##----------------------------------------------------------------
-SET(CRYPTO_TEST_SOURCES
+set(CRYPTO_EXAMPLE_SOURCES
+    ../aesgcm256_1.cpp
+    ../aesgcm256_2.cpp
+    ../aesgcm256_3.cpp
+    ../aesgcm256_4.cpp
+    ../CryptoController.cpp
+    ../CryptoError.cpp
+    ../Logger.cpp
+    ../RandomSequence.cpp
+    )
+
+set(CRYPTO_TEST_SOURCES
     AesGcmTest.cpp
     Harness.cpp
     TestCryptoController.cpp
     TestCryptoController.hpp
+    ${CRYPTO_EXAMPLE_SOURCES}
     )
-               
+
+set_source_files_properties("${CRYPTO_TEST_SOURCES}"
+    PROPERTIES
+    COMPILE_FLAGS "${SECP_TEST_COMPILE_FLAGS}"
+)
 ##----------------------------------------------------------------
 ## Build targets that use boost test framework
 ##----------------------------------------------------------------
@@ -22,7 +38,6 @@ add_executable(crypto-test EXCLUDE_FROM_ALL
 ## Links
 ##----------------------------------------------------------------
 target_link_libraries(crypto-test
-    aesgcm
     ${OPENSSL_CRYPTO_LIBRARY}
     ${OPENSSL_SSL_LIBRARY}
     ${BOOST_ROOT}/lib/libboost_date_time.a
