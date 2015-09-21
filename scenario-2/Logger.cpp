@@ -4,7 +4,7 @@
 #include "Logger.hpp"
 #include <boost/date_time.hpp>
 #include <iostream>
-#include <string>
+#include <mutex>
 #include <thread>
 
 namespace
