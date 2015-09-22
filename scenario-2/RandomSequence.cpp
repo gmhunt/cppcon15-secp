@@ -8,6 +8,8 @@
 #include "openssl/rand.h"
 #include "CryptoError.hpp"
 
+#include <sstream>
+
 namespace secp
 {
 
@@ -31,6 +33,8 @@ unsigned byteSize(const secp::Random bits)
     return size;
 }
 
+std::string unknownBitLengthError(const secp::Random bits);
+
 std::string bitsAsString(const secp::Random bits)
 {
     std::string bs;
@@ -45,27 +49,42 @@ std::string bitsAsString(const secp::Random bits)
             bs = "256";
             break;
         default:
-            //THROW_CRYPTO_ERROR(boost::str(boost::format(randomSaltBytesFailure) % keyLen % lastCryptoError()));
+            THROW_CRYPTO_ERROR(unknownBitLengthError(bits));
             break;
     }
     return bs;
 }
 
-
+std::string unknownBitLengthError(const secp::Random bits)
+{
+    std::stringstream ss;
+    ss << "Unknown bit length: " << bitsAsString(bits);
+    return ss.str();
+}
+/**
+ * Generates a random sequence of bytes using a cryptographic quality Key Derivation Function.
+ * Suitable for generating:
+ * - AES 256 Keys
+ * - Initialization vectors
+ */
 std::vector<unsigned char> generateRandomSequence(const Random bits)
 {
     auto keyLen = byteSize(bits);
 
-    std::vector<unsigned char> aesKey(keyLen, 0);
+    std::vector<unsigned char> aesKey(keyLen,  0);
     std::vector<unsigned char> aesPass(keyLen, 0);
     std::vector<unsigned char> aesSalt(keyLen, 0);
 
     if (0 == RAND_bytes(&aesPass[0], keyLen)) {
-        //THROW_CRYPTO_ERROR(boost::str(boost::format(randomSaltBytesFailure) % keyLen % lastCryptoError()));
+        std::stringstream ss;
+        ss << "Random generartion failure for keylen: " << keyLen << ", error: " << lastCryptoError();
+        THROW_CRYPTO_ERROR(ss.str());
     }
 
     if (0 == RAND_bytes(&aesSalt[0], 8)) {
-        //THROW_CAP_CRYPTO_ERROR(boost::str(boost::format(randomPassBytesFailure) % 8 % lastCryptoError()));
+        std::stringstream ss;
+        ss << "Random generation failure for 8-byte salt, error: " << lastCryptoError();
+        THROW_CRYPTO_ERROR(ss.str());
     }
 
     int rc(0);
@@ -89,11 +108,14 @@ std::vector<unsigned char> generateRandomSequence(const Random bits)
             rc = EVP_BytesToKey(EVP_aes_256_cbc(), EVP_sha256(), &aesSalt[0], &aesPass[0], keyLen, 5, &aesKey[0], NULL);
             break;
         default:
-          //  THROW_CAP_CRYPTO_ERROR(boost::str(boost::format(unknownBitLength) % bits));
+            THROW_CRYPTO_ERROR(unknownBitLengthError(bits));
             break;
     }
+
     if (0 == rc) {
-        //THROW_CAP_CRYPTO_ERROR(boost::str(boost::format(bytesToKeyFailure) % keyLen % lastCryptoError()));
+        std::stringstream ss;
+        ss << "BytesToKey failed for keylen: " << keyLen << ", error: " << lastCryptoError();
+        THROW_CRYPTO_ERROR(ss.str());
     }
 
     return aesKey;

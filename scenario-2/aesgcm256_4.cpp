@@ -36,6 +36,13 @@ const size_t TAG_LEN(16);
 const size_t IV_LEN(12);
 const size_t KEY_LEN(32);
 
+std::string formattedCryptoError(const std::string& info)
+{
+    std:: stringstream ss;
+    ss << info << ": " << secp::lastCryptoError();
+    return ss.str();
+}
+
 std::string lengthFormatError(const std::string& item, const size_t actualSize, const size_t wantedSize)
 {
     std::stringstream ss;
@@ -53,10 +60,10 @@ void basicEncryptAesGcm256_4(const std::vector<unsigned char>& key,
     EVP_CIPHER_CTX_init(&context);
 
     if (0 == EVP_EncryptInit_ex(&context, EVP_aes_256_gcm(), NULL, NULL, NULL)) {
-        THROW_CRYPTO_ERROR(secp::lastCryptoError());
+        THROW_CRYPTO_ERROR(formattedCryptoError("Failed initializing encrypt context"));
     }
     if (0 == EVP_EncryptInit_ex(&context, NULL, NULL, &key[0], &iv[0])) {
-        THROW_CRYPTO_ERROR(secp::lastCryptoError());
+        THROW_CRYPTO_ERROR(formattedCryptoError("Failed setting encrypt key and iv"));
     }
     tag.clear();
     tag.resize(TAG_LEN);
@@ -78,7 +85,7 @@ void basicEncryptAesGcm256_4(const std::vector<unsigned char>& key,
     int cipherTextLen{0};
 
     if (0 == EVP_EncryptUpdate(&context, &cipherText[0], &cipherTextLen, &plainText[0], plainTextLen)) {
-        THROW_CRYPTO_ERROR(secp::lastCryptoError());
+        THROW_CRYPTO_ERROR(formattedCryptoError("Encrypt update failed"));
     }
 
     /**
@@ -86,13 +93,13 @@ void basicEncryptAesGcm256_4(const std::vector<unsigned char>& key,
      * We use an explicit static_cast<size_t> to silence the compile warning.
      */
     if (0 == EVP_EncryptFinal_ex(&context, &cipherText[static_cast<size_t>(cipherTextLen)], &cipherTextLen)) {
-        THROW_CRYPTO_ERROR(secp::lastCryptoError());
+        THROW_CRYPTO_ERROR(formattedCryptoError("Failed finalizing cipherText"));
     }
     if (0 ==  EVP_CIPHER_CTX_ctrl(&context, EVP_CTRL_GCM_GET_TAG, TAG_LEN, &tag[0])) {
-        THROW_CRYPTO_ERROR(secp::lastCryptoError());
+        THROW_CRYPTO_ERROR(formattedCryptoError("Failed retreiving tag"));
     }
     if (0 == EVP_CIPHER_CTX_cleanup(&context)) {
-        THROW_CRYPTO_ERROR(secp::lastCryptoError());
+        THROW_CRYPTO_ERROR(formattedCryptoError("Context cleanup failed"));
     }
 }
 
@@ -106,10 +113,10 @@ void basicDecryptAesGcm256_4(const std::vector<unsigned char>& key,
     EVP_CIPHER_CTX_init(&context);
 
     if (0 == EVP_DecryptInit_ex(&context, EVP_aes_256_gcm(), NULL, NULL, NULL)) {
-        THROW_CRYPTO_ERROR(secp::lastCryptoError());
+        THROW_CRYPTO_ERROR(formattedCryptoError("Failed initializing decrypt context"));
     }
     if (0 == EVP_DecryptInit_ex(&context, NULL, NULL, &key[0], &iv[0])) {
-        THROW_CRYPTO_ERROR(secp::lastCryptoError());
+        THROW_CRYPTO_ERROR(formattedCryptoError("Failed setting decrypt key and iv"));
     }
     int workingLen{0};
     plainText.clear();
@@ -124,13 +131,13 @@ void basicDecryptAesGcm256_4(const std::vector<unsigned char>& key,
      */
     int cipherTextLen{static_cast<int>(cipherText.size())};
     if (0 == EVP_DecryptUpdate(&context, &plainText[0], &workingLen, &cipherText[0], cipherTextLen)) {
-        THROW_CRYPTO_ERROR(secp::lastCryptoError());
+        THROW_CRYPTO_ERROR(formattedCryptoError("Failed decrypt update"));
     }
 
     int plainTextLen{workingLen};
     std::vector<unsigned char> tagCopy(tag);
     if (0 == EVP_CIPHER_CTX_ctrl(&context, EVP_CTRL_GCM_SET_TAG, TAG_LEN, &tagCopy[0])) {
-        THROW_CRYPTO_ERROR(secp::lastCryptoError());
+        THROW_CRYPTO_ERROR(formattedCryptoError("Failed finalizing setting tag"));
     }
 
     /**
@@ -138,11 +145,11 @@ void basicDecryptAesGcm256_4(const std::vector<unsigned char>& key,
      * We use an explicit static_cast<size_t> to silence the compile warning.
      */
     if (0 == EVP_DecryptFinal_ex(&context, &plainText[static_cast<size_t>(workingLen)], &workingLen)) {
-        THROW_CRYPTO_ERROR(secp::lastCryptoError());
+        THROW_CRYPTO_ERROR(formattedCryptoError("Failed finalizing decrypt plainText"));
     }
     plainTextLen += workingLen;
     if (0 == EVP_CIPHER_CTX_cleanup(&context)) {
-        THROW_CRYPTO_ERROR(secp::lastCryptoError());
+        THROW_CRYPTO_ERROR(formattedCryptoError("Decrypt context cleanup failed"));
     }
 }
 

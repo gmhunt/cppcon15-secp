@@ -22,17 +22,26 @@ set(CRYPTO_TEST_SOURCES
     ${CRYPTO_EXAMPLE_SOURCES}
     )
 
-set_source_files_properties("${CRYPTO_TEST_SOURCES}"
-    PROPERTIES
+set_property(SOURCE ${CRYPTO_TEST_SOURCES}
+    PROPERTY COMPILE_FLAGS "${SECP_TEST_COMPILE_FLAGS}"
+)
+message("** SECP_TEST_COMPILE_FLAGS....: '${SECP_TEST_COMPILE_FLAGS}'")
+
+add_library(dtest
+    STATIC
+    ${CRYPTO_TEST_SOURCES}
+)
+
+SET_TARGET_PROPERTIES(dtest PROPERTIES
     COMPILE_FLAGS "${SECP_TEST_COMPILE_FLAGS}"
 )
+
 ##----------------------------------------------------------------
 ## Build targets that use boost test framework
 ##----------------------------------------------------------------
 add_executable(crypto-test EXCLUDE_FROM_ALL
     ${CRYPTO_TEST_SOURCES}
 )
-                      
 
 ##----------------------------------------------------------------
 ## Links

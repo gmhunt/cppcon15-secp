@@ -8,5 +8,6 @@ include("DetectPlatform")
 include("ConfigureThirdparty")
 
 #add_subdirectory(scenario-1)
+add_subdirectory(examples)
 add_subdirectory(scenario-2)
 
