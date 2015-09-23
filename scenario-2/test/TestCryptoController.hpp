@@ -18,7 +18,7 @@ public:
 private:
     TestCryptoController() = default;
 
-    secp::CryptoController        cryptoController_;
+    secp::CryptoController cryptoController_;
 
     static std::shared_ptr<TestCryptoController> testCryptoController_;
 

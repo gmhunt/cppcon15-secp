@@ -6,6 +6,9 @@ add_executable(uint-wrap EXCLUDE_FROM_ALL
 add_executable(int-overflow EXCLUDE_FROM_ALL
     IntOverflow.cpp
 )
+add_executable(conversions EXCLUDE_FROM_ALL
+    Conversions.cpp
+)
 
 
 if(SECP_PLATFORM_LINUX)

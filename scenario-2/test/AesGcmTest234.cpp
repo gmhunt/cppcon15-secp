@@ -51,7 +51,7 @@ void testGCMEncryption(const std::string &testName, const unsigned iterations, s
     unsigned origPlainTextLen = static_cast<unsigned int>((iterations * 32) + unevenBlock.length());
 
     origPlainText.reserve(origPlainTextLen);
-    for (unsigned i(0); i < iterations; ++ i) {
+    for (unsigned i(0); i < iterations; ++i) {
         std::vector<unsigned char> element = secp::generateRandomSequence(secp::Random::SIZE_256_BITS);
         origPlainText.insert(origPlainText.end(), element.begin(), element.end());
     }
@@ -100,7 +100,7 @@ void testGCMEncryption4(const std::string &testName, const unsigned iterations, 
     unsigned origPlainTextLen = static_cast<unsigned int>((iterations * 32) + unevenBlock.length());
 
     origPlainText.reserve(origPlainTextLen);
-    for (unsigned i(0); i < iterations; ++ i) {
+    for (unsigned i(0); i < iterations; ++i) {
         std::vector<unsigned char> element = secp::generateRandomSequence(secp::Random::SIZE_256_BITS);
         origPlainText.insert(origPlainText.end(), element.begin(), element.end());
     }
@@ -220,24 +220,6 @@ BOOST_AUTO_TEST_CASE(create_random_sequence)
 }
 BOOST_AUTO_TEST_SUITE_END()
 
-
-BOOST_AUTO_TEST_SUITE(aes_encrypt_1)
-BOOST_AUTO_TEST_CASE(aes256_gcm_encrypt_1)
-{
-    try {
-
-        secp::log(secp::INFO, "BOOST_AUTO_TEST_CASE(aes256_gcm_encrypt_1) - starting...");
-
-        secp::Demo1Tester demo1Tester;
-        testGCMEncryption("AES256-GCM-1", 1201, demo1Tester);
-
-        secp::log(secp::INFO, "BOOST_AUTO_TEST_CASE(aes256_gcm_encrypt_1) - end.");
-
-    } catch(std::exception& e) {
-        std::cerr << "CAUGHT std::exception. " << e.what() << ". Shutting down..\n\n";
-    }
-}
-BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(aes_encrypt_2)
 BOOST_AUTO_TEST_CASE(aes256_gcm_encrypt_2)

@@ -14,7 +14,7 @@ int encryptAesGcm256_1(const unsigned char *key,
                        const unsigned char *plainText,
                        int plainTextLen,
                        unsigned char *cipherText,
-                       int &cipherTextLen,
+                       int& cipherTextLen,
                        unsigned char *tag)
 {
     int rc;
@@ -35,20 +35,26 @@ int decryptAesGcm256_1(const unsigned char *key,
                        const unsigned char *cipherText,
                        const int cipherTextLen,
                        unsigned char *plainText,
-                       int &plainTextLen)
+                       int& plainTextLen)
 {
-    int rc;
+    int rc(0);
     EVP_CIPHER_CTX* context = EVP_CIPHER_CTX_new();
     EVP_DecryptInit_ex(context, EVP_aes_256_gcm(), NULL, NULL, NULL);
     EVP_DecryptInit_ex(context, NULL, NULL, key, iv);
 
     int workingLen(0);
-    EVP_DecryptUpdate(context, plainText, &workingLen, cipherText, cipherTextLen);
+    rc = EVP_DecryptUpdate(context, plainText, &workingLen, cipherText, cipherTextLen);
+    if (rc == 0) {
+        return -1;
+    }
     plainTextLen =  workingLen;
 
     std::vector<unsigned char> tagCopy(16);
     memcpy((void*)&tagCopy[0], (void*)tag, 16);
-    EVP_CIPHER_CTX_ctrl(context, EVP_CTRL_GCM_SET_TAG, 16, &tagCopy[0]);
+    rc = EVP_CIPHER_CTX_ctrl(context, EVP_CTRL_GCM_SET_TAG, 16, &tagCopy[0]);
+    if (rc == 0) {
+        return -2;
+    }
 
     // Return 1 success, 0 failed
     rc = EVP_DecryptFinal_ex(context, plainText + workingLen, &workingLen);

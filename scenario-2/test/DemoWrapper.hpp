@@ -5,7 +5,6 @@
 #ifndef SECP_DEMOWRAPPER_H
 #define SECP_DEMOWRAPPER_H
 
-#include "aesgcm256_1.hpp"
 #include "aesgcm256_2.hpp"
 #include "aesgcm256_3.hpp"
 #include "aesgcm256_4.hpp"
@@ -33,41 +32,6 @@ public:
                          const std::vector<unsigned char>& iv,
                          const std::vector<unsigned char>& cipherText,
                          std::vector<unsigned char>& plainText) = 0;
-};
-
-class Demo1Tester : public DemoWrapper
-{
-public:
-    void encrypt(const std::vector<unsigned char>& key,
-                 const std::vector<unsigned char>& iv,
-                 const std::vector<unsigned char>& plainText,
-                 std::vector<unsigned char>& tag,
-                 std::vector<unsigned char>& cipherText)
-    {
-        int ptextLen = (int)plainText.size();
-        int ctextLen(ptextLen);
-
-        tag.resize(16);
-        cipherText.clear();
-        cipherText.resize(ptextLen);
-
-        encryptAesGcm256_1(&key[0], &iv[0], &plainText[0], plainText.size(), &cipherText[0], ctextLen, &tag[0]);
-    }
-
-    void decrypt(const std::vector<unsigned char>& key,
-                 const std::vector<unsigned char>& tag,
-                 const std::vector<unsigned char>& iv,
-                 const std::vector<unsigned char>& cipherText,
-                 std::vector<unsigned char>& plainText)
-    {
-        int ctextLen = (int)cipherText.size();
-        int ptextLen(ctextLen);
-
-        plainText.clear();
-        plainText.resize(ptextLen);
-
-        decryptAesGcm256_1(&key[0], &tag[0], &iv[0], &cipherText[0], ctextLen, &plainText[0], ptextLen);
-    };
 };
 
 class Demo2Tester : public DemoWrapper

@@ -5,7 +5,8 @@
 std::shared_ptr<TestCryptoController> TestCryptoController::instance()
 {
     if (testCryptoController_ == nullptr) {
-        TestCryptoController::testCryptoController_ = std::shared_ptr<TestCryptoController>(new TestCryptoController());
+        TestCryptoController::testCryptoController_ =
+                std::shared_ptr<TestCryptoController>(new TestCryptoController());
     }
     return testCryptoController_;
 }
