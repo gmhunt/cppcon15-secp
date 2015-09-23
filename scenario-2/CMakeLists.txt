@@ -58,4 +58,20 @@ target_link_libraries(demo4
     aes4
 )
 
+#
+# demo 4
+#
+add_library(hmac
+    Hmac.cpp
+    CryptoError.cpp
+)
+add_executable(hmac-demo
+    main.cpp
+)
+target_link_libraries(hmac-demo
+    ${OPENSSL_LIBRARY}
+    hmac
+)
+
+
 add_subdirectory(test)

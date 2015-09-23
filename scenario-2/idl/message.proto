@@ -11,6 +11,8 @@ enum MessageType {
     FulfillmentOrderStatusResponse = 4;
 }
 
+// Type 4 generated UUID
+//
 message Uuid {
     required uint64 lsb = 1;
     required uint64 msb = 2;
@@ -32,9 +34,12 @@ message OrderEnvelope {
     //         iso format (seconds since epoch) +
     //    message as string 
     required bytes message_hmac = 1;
-    
-    //
-    required MessageType message_type = 2;
+
+    // Unique Identifier
+    required Uuid message_id = 2;
+
+    // Type of message encrypted in the message field
+    required MessageType message_type = 3;
 
     // Time is generally unreliable but we included here.   
     // It is the time the message is created in UTC on
@@ -44,11 +49,11 @@ message OrderEnvelope {
     //
     // NOTE: No support in this IDL for distributing keys.
     //
-    required Time message_time = 3;
+    required Time message_time = 4;
     
     // Base64 encoded Encrypted Message. 
     // Default encryption algorithm AES-GCM-256.
-    optional bytes message = 4;
+    optional bytes message = 5;
 }
 
 message OrderDetail {

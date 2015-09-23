@@ -2,6 +2,7 @@
 #include "boost/format.hpp"
 #include "boost/test/unit_test.hpp"
 
+#include "Hmac.hpp"
 #include "Logger.hpp"
 #include "TestCryptoController.hpp"
 #include "DemoWrapper.hpp"
@@ -14,11 +15,18 @@
 namespace
 {
 
+std::string bin2hex(const std::string& source)
+{
+    std::string hexString;
+    boost::algorithm::hex(source, std::back_inserter(hexString));
+    return hexString;
+}
+
 std::string bin2hex(const std::vector<unsigned char>& source)
 {
     std::string bin{source.begin(), source.end()};
     std::string hexString;
-    boost::algorithm::hex(source, std::back_inserter(hexString));
+    boost::algorithm::hex(bin, std::back_inserter(hexString));
     return hexString;
 }
 
@@ -197,7 +205,47 @@ void checkCrypto()
     TestCryptoController::instance();
 }
 
+std::string convertSequence(const std::vector<unsigned char>& sequence)
+{
+    return std::string(sequence.begin(), sequence.end());
+}
+
 } // namespace null
+
+BOOST_AUTO_TEST_SUITE(hmac)
+BOOST_AUTO_TEST_CASE(create_hmac)
+{
+    try {
+
+        secp::log(secp::INFO, "BOOST_AUTO_TEST_CASE(create_hmac) - starting...");
+
+        auto smallKey   = convertSequence(secp::generateRandomSequence(secp::Random::SIZE_96_BITS));
+        auto correctKey = convertSequence(secp::generateRandomSequence(secp::Random::SIZE_256_BITS));
+        std::string largeKey{correctKey};
+        largeKey.insert(largeKey.end(), smallKey.begin(), smallKey.end());
+
+        std::string message;
+        // Create random message
+        for (unsigned i(0); i < 10000; ++ i) {
+            std::vector<unsigned char> sequence = secp::generateRandomSequence(secp::Random::SIZE_256_BITS);
+            message.insert(message.end(), sequence.begin(), sequence.end());
+        }
+
+        BOOST_CHECK_THROW(secp::generateHmac(smallKey, message), secp::CryptoError);
+        BOOST_CHECK_THROW(secp::generateHmac(largeKey, message), secp::CryptoError);
+
+        std::string hmac = secp::generateHmac(correctKey, message);
+        std::stringstream ss;
+        ss << "BOOST_AUTO_TEST_CASE(create_hmac) - Generated hmac: '"
+           << bin2hex(hmac) << "'";
+        secp::log(secp::INFO, ss.str());
+        secp::log(secp::INFO, "BOOST_AUTO_TEST_CASE(create_hmac) - end.");
+
+    } catch(std::exception& e) {
+        std::cerr << "CAUGHT std::exception. " << e.what() << ". Shutting down..\n\n";
+    }
+}
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(random_sequence)
 BOOST_AUTO_TEST_CASE(create_random_sequence)

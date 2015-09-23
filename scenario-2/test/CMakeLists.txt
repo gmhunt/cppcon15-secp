@@ -7,6 +7,8 @@ set(CRYPTO_BASE_SOURCES
     ../CryptoController.cpp
     ../CryptoError.cpp
     ../CryptoError.hpp
+    ../Hmac.cpp
+    ../Hmac.hpp
     ../Logger.cpp
     ../Logger.hpp
     ../RandomSequence.cpp
@@ -82,8 +84,11 @@ endif()
 ## check targets run under boost test framework
 ##----------------------------------------------------------------
 set(UNIT_TEST_LOG "test_suite" CACHE STRING "The log level for unit testing")
+add_custom_target(check-hmac
+    crypto-test234 --detect_memory_leak=0 --run_test=hmac --log_level=${UNIT_TEST_LOG}
+    DEPENDS crypto-test234)
 add_custom_target(check-random
-    crypto-test --detect_memory_leak=0 --run_test=random_sequence --log_level=${UNIT_TEST_LOG}
+    crypto-test234 --detect_memory_leak=0 --run_test=random_sequence --log_level=${UNIT_TEST_LOG}
     DEPENDS crypto-test234)
 add_custom_target(check-demo1
     crypto-test1 --detect_memory_leak=0 --run_test=aes_encrypt_1 --log_level=${UNIT_TEST_LOG}

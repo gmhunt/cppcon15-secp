@@ -1,0 +1,55 @@
+ECDHE-RSA-AES128-GCM-SHA256
+
+● algorithm for key exchange ­ Eliptical Curve Ephemeral Diffie-­Hellman that supports Perfect Forward Secrecy eliminating previous session playback decoding if keys have been compromised.
+● algorithm for authentication ­ RSA uses asymmetric public/private keys where public keys
+are conveyed in X.509 Identity Certificates and private keys are secured by the owning
+endpoint.
+● algorithm for encrypting the stream contents ­ AES­GCM an efficient algorithm used for
+encrypting the data contents. Uses Galois Counter­ Method (GCM) instead of Chain Block
+Coding (CBC)
+● algorithm computing cryptographic checksums ­ SHA256 algorithm used for hashing while
+message authentication codes that are used to detect accidental or intentional tampering of a block of encrypted data.
+
+
+
+RFC 6125 Idenity Verification using X.509 PKIX
+RFC 5280, 6818 CRL
+
+
+Does not rely on the Common Name used in the subject field
+
+subjectAlternateField
+DNS-ID, SRV-ID, URI-ID
+
+SRV-ID=fo_server._message.fulfillmentco.com
+DNS-ID=tp.fulfillmentco.com
+
+SRV-ID=requestor._message.consolidated.com
+DNS-ID=s153.consolidated.com
+
+
+
+Key Usage/Extended Key usage fields
+
+Server Side
+EKU serverAuth  Must NOT include clientAuth
+KU keyEncipherment, keyAgreement (Needed for DHE or ECDHE ciphers), digitalSignature  
+
+Client Side
+EKU clientAuth  Must NOT include serverAuth
+KU keyAgreement, digitalSignature  
+
+
+During cert negotiation after after cert path verification
+
+Read subjectAlternateName and parse any service ID
+Use the socket connection information about the peer
+
+The application callback is given the Server ID Certificate, the configured Server’s host name and the IP Address of the Bridge when the connection was established prior to TLS Handshaking.
+
+At least one SRV-ID and at least one DNS-ID entry must exist in the Server’s Certificate.  SRV-ID must be unique without wildcards while DNS-ID entries may have leading wildcards.
+
+The Client constructs a candidate SRV-ID knowing that the service a Server would use fo_server with a protocol of _message and the hostname passed to the application callback.
+
+First the Client compares the candidate SRV-ID to the SRV-ID entries.  If there is a match, then the Client does a match of the server name portion of the SRV-ID with the DNS-ID entries.  If there is a match, a forward DNS lookup is done on the server name.  If the query results contains an IP Address that matches the IP Address reported by the connection, then the Server host name is considered verified.
+

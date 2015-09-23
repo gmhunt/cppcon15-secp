@@ -1,12 +1,12 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/..)
 
-add_executable(uint-wrap EXCLUDE_FROM_ALL
+add_executable(ex1 EXCLUDE_FROM_ALL
     UintWrap.cpp
 )
-add_executable(int-overflow EXCLUDE_FROM_ALL
+add_executable(ex2 EXCLUDE_FROM_ALL
     IntOverflow.cpp
 )
-add_executable(conversions EXCLUDE_FROM_ALL
+add_executable(ex3 EXCLUDE_FROM_ALL
     Conversions.cpp
 )
 
