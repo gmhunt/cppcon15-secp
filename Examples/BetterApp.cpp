@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 
     try {
 
-        secp::Properties properties("ex4", "1.0.0");
+        secp::Properties properties("ex5", "1.0.0");
         std::cout << "Starting..." << std::endl;
 
         properties.addUint32Property("thread.count", 3, "Number of worker threads").setRange(1, 5);

@@ -26,12 +26,6 @@ extern const boost::uint32_t PROPERTIES_MIN_NAME_LENGTH;
 extern const boost::uint32_t PROPERTIES_MAX_NAME_LENGTH;
 extern const boost::uint32_t PROPERTIES_MIN_DESCRIPTION_LENGTH;
 extern const boost::uint32_t PROPERTIES_MAX_DESCRIPTION_LENGTH;
-extern const boost::uint32_t PROPERTIES_MIN_STRING_LENGTH;
-extern const boost::uint32_t PROPERTIES_MAX_STRING_LENGTH;
-extern const boost::uint32_t PROPERTIES_MIN_PATH_LENGTH;
-extern const boost::uint32_t PROPERTIES_MAX_PATH_LENGTH;
-extern const std::string errorFormatNotFound;
-extern const std::string errorFormatUnchangeable;
 
 std::string validatePropertyName(const std::string& propertyName,
                                  const boost::uint32_t minLength = PROPERTIES_MIN_NAME_LENGTH,

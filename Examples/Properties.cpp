@@ -40,9 +40,9 @@ ValType getPropertyByType(const std::string& name, const MapType& propertyMap)
     if (citerator != propertyMap.end()) {
         value = citerator->second.value();
     } else {
-        boost::format f(errorFormatNotFound);
-        f % name;
-        THROW_SECP_ERROR(PropertyNotFoundError, f.str());
+        std::stringstream ss;
+        ss << "Property Not found: '" << name << "'";
+        THROW_SECP_ERROR(PropertyNotFoundError, ss.str());
     }
     return value;
 }
@@ -55,9 +55,9 @@ void setPropertyByType(const std::string& name, const ValType& value, MapType& p
     if (iterator != propertyMap.end()) {
         iterator->second.setValue(value);
     } else {
-        boost::format f(errorFormatNotFound);
-        f % name;
-        THROW_SECP_ERROR(PropertyNotFoundError, f.str());
+        std::stringstream ss;
+        ss << "Property Not found: '" << name << "'";
+        THROW_SECP_ERROR(PropertyNotFoundError, ss.str());
     }
 }
 

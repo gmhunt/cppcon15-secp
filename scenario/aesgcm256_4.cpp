@@ -20,7 +20,9 @@
  *
  * 2. All encryption and decryption required an initialization vector of 16-bytes (96-bits).  The iv doesn't
  *    have to be random for this algorithm but cannot be used more than once with the same key.
+ *
  * 3. Encryption produces a 16 bytes tag used for tampering detection.
+ *
  * 4. All three output elements from encryption must be concatenated together in a std::string used
  *    to set a string field in a Google protobuf message.
  *
