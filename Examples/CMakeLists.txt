@@ -18,6 +18,19 @@ target_link_libraries(ex4
     ${BOOST_ROOT}/lib/libboost_program_options.a
 )
 
+add_executable(ex5 EXCLUDE_FROM_ALL
+    BetterApp.cpp
+    PropertyErrors.cpp
+    PropertyErrors.hpp
+    PropertyTypes.cpp
+    PropertyTypes.hpp
+)
+target_link_libraries(ex5
+    ${BOOST_ROOT}/lib/libboost_system.a
+    ${BOOST_ROOT}/lib/libboost_thread.a
+    ${BOOST_ROOT}/lib/libboost_program_options.a
+)
+
 
 if(SECP_PLATFORM_LINUX)
     target_link_libraries(ex1
@@ -30,6 +43,10 @@ if(SECP_PLATFORM_LINUX)
         dl
     )
     target_link_libraries(ex4
+        dl
+        pthread
+    )
+    target_link_libraries(ex5
         dl
         pthread
     )
