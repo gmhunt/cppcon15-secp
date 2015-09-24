@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(aes256_gcm_encrypt_1)
 
         secp::log(secp::INFO, "BOOST_AUTO_TEST_CASE(aes256_gcm_encrypt_1) - starting...");
         checkCrypto();
-        
+
         testGCMEncryption("AES256-GCM-1", 2);
 
         secp::log(secp::INFO, "BOOST_AUTO_TEST_CASE(aes256_gcm_encrypt_1) - end.");
