@@ -218,6 +218,7 @@ BOOST_AUTO_TEST_CASE(create_hmac)
     try {
 
         secp::log(secp::INFO, "BOOST_AUTO_TEST_CASE(create_hmac) - starting...");
+        checkCrypto();
 
         auto smallKey   = convertSequence(secp::generateRandomSequence(secp::Random::SIZE_96_BITS));
         auto correctKey = convertSequence(secp::generateRandomSequence(secp::Random::SIZE_256_BITS));
@@ -253,6 +254,7 @@ BOOST_AUTO_TEST_CASE(create_random_sequence)
     try {
 
         secp::log(secp::INFO, "BOOST_AUTO_TEST_CASE(create_random_sequence) - starting...");
+        checkCrypto();
 
         unsigned iterations(1000);
         
@@ -294,6 +296,7 @@ BOOST_AUTO_TEST_CASE(aes256_gcm_encrypt_3)
     try {
 
         secp::log(secp::INFO, "BOOST_AUTO_TEST_CASE(aes256_gcm_encrypt_3) - starting...");
+        checkCrypto();
 
         secp::Demo3Tester demo3Tester;
         testGCMEncryption("AES256-GCM-1", 1201, demo3Tester);
@@ -312,6 +315,7 @@ BOOST_AUTO_TEST_CASE(aes256_gcm_encrypt_4)
     try {
 
         secp::log(secp::INFO, "BOOST_AUTO_TEST_CASE(aes256_gcm_encrypt_4) - starting...");
+        checkCrypto();
 
         secp::Demo4Tester demo4Tester;
         testGCMEncryption4("AES256-GCM-1", 1201, demo4Tester);

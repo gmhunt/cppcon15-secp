@@ -84,6 +84,9 @@ endif()
 ## check targets run under boost test framework
 ##----------------------------------------------------------------
 set(UNIT_TEST_LOG "test_suite" CACHE STRING "The log level for unit testing")
+add_custom_target(check
+    crypto-test234 --detect_memory_leak=0 --log_level=${UNIT_TEST_LOG}
+    DEPENDS crypto-test234)
 add_custom_target(check-hmac
     crypto-test234 --detect_memory_leak=0 --run_test=hmac --log_level=${UNIT_TEST_LOG}
     DEPENDS crypto-test234)
