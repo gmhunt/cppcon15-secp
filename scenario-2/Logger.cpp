@@ -19,6 +19,7 @@ namespace secp
 
 const std::string DEBUG("DEBUG");
 const std::string INFO("INFO");
+const std::string FATAL("FATAL");
 
 void log(const std::string& type, const std::string& logEntry)
 {

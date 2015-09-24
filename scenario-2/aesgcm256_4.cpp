@@ -4,6 +4,7 @@
 
 #include "aesgcm256_4.hpp"
 #include "CryptoError.hpp"
+#include "Logger.hpp"
 
 #include "openssl/evp.h"
 #include <sstream>
@@ -32,6 +33,30 @@
 namespace
 {
 
+/**
+ * Borrowed this RAII wrapper idea from boost::asio
+ */
+struct SafeContext
+{
+    SafeContext()
+        : context_()
+    {
+        EVP_CIPHER_CTX_init(&context_);
+        secp::log(secp::DEBUG, "Context initialized");
+    }
+
+    ~SafeContext()
+    {
+        if (0 == EVP_CIPHER_CTX_cleanup(&context_)) {
+            secp::log(secp::FATAL, "Context cleanup failed");
+        } else {
+            secp::log(secp::DEBUG, "Context cleanup successful");
+        }
+    }
+
+    EVP_CIPHER_CTX context_;
+};
+
 const size_t TAG_LEN(16);
 const size_t IV_LEN(12);
 const size_t KEY_LEN(32);
@@ -56,13 +81,12 @@ void basicEncryptAesGcm256_4(const std::vector<unsigned char>& key,
                              std::vector<unsigned char>& cipherText,
                              std::vector<unsigned char>& tag)
 {
-    EVP_CIPHER_CTX context;
-    EVP_CIPHER_CTX_init(&context);
+    SafeContext c;
 
-    if (0 == EVP_EncryptInit_ex(&context, EVP_aes_256_gcm(), NULL, NULL, NULL)) {
+    if (0 == EVP_EncryptInit_ex(&c.context_, EVP_aes_256_gcm(), NULL, NULL, NULL)) {
         THROW_CRYPTO_ERROR(formattedCryptoError("Failed initializing encrypt context"));
     }
-    if (0 == EVP_EncryptInit_ex(&context, NULL, NULL, &key[0], &iv[0])) {
+    if (0 == EVP_EncryptInit_ex(&c.context_, NULL, NULL, &key[0], &iv[0])) {
         THROW_CRYPTO_ERROR(formattedCryptoError("Failed setting encrypt key and iv"));
     }
     tag.clear();
@@ -84,7 +108,7 @@ void basicEncryptAesGcm256_4(const std::vector<unsigned char>& key,
     cipherText.resize(static_cast<size_t>(plainTextLen));
     int cipherTextLen{0};
 
-    if (0 == EVP_EncryptUpdate(&context, &cipherText[0], &cipherTextLen, &plainText[0], plainTextLen)) {
+    if (0 == EVP_EncryptUpdate(&c.context_, &cipherText[0], &cipherTextLen, &plainText[0], plainTextLen)) {
         THROW_CRYPTO_ERROR(formattedCryptoError("Encrypt update failed"));
     }
 
@@ -92,14 +116,11 @@ void basicEncryptAesGcm256_4(const std::vector<unsigned char>& key,
      * The next line without the cast would be a harmless widening conversion of an int to size_t.
      * We use an explicit static_cast<size_t> to silence the compile warning.
      */
-    if (0 == EVP_EncryptFinal_ex(&context, &cipherText[static_cast<size_t>(cipherTextLen)], &cipherTextLen)) {
+    if (0 == EVP_EncryptFinal_ex(&c.context_, &cipherText[static_cast<size_t>(cipherTextLen)], &cipherTextLen)) {
         THROW_CRYPTO_ERROR(formattedCryptoError("Failed finalizing cipherText"));
     }
-    if (0 ==  EVP_CIPHER_CTX_ctrl(&context, EVP_CTRL_GCM_GET_TAG, TAG_LEN, &tag[0])) {
+    if (0 ==  EVP_CIPHER_CTX_ctrl(&c.context_, EVP_CTRL_GCM_GET_TAG, TAG_LEN, &tag[0])) {
         THROW_CRYPTO_ERROR(formattedCryptoError("Failed retreiving tag"));
-    }
-    if (0 == EVP_CIPHER_CTX_cleanup(&context)) {
-        THROW_CRYPTO_ERROR(formattedCryptoError("Context cleanup failed"));
     }
 }
 
@@ -109,13 +130,12 @@ void basicDecryptAesGcm256_4(const std::vector<unsigned char>& key,
                              const std::vector<unsigned char>& cipherText,
                              std::vector<unsigned char>& plainText)
 {
-    EVP_CIPHER_CTX context;
-    EVP_CIPHER_CTX_init(&context);
+    SafeContext c;
 
-    if (0 == EVP_DecryptInit_ex(&context, EVP_aes_256_gcm(), NULL, NULL, NULL)) {
+    if (0 == EVP_DecryptInit_ex(&c.context_, EVP_aes_256_gcm(), NULL, NULL, NULL)) {
         THROW_CRYPTO_ERROR(formattedCryptoError("Failed initializing decrypt context"));
     }
-    if (0 == EVP_DecryptInit_ex(&context, NULL, NULL, &key[0], &iv[0])) {
+    if (0 == EVP_DecryptInit_ex(&c.context_, NULL, NULL, &key[0], &iv[0])) {
         THROW_CRYPTO_ERROR(formattedCryptoError("Failed setting decrypt key and iv"));
     }
     int workingLen{0};
@@ -130,13 +150,13 @@ void basicDecryptAesGcm256_4(const std::vector<unsigned char>& key,
      * conversion.  We use an explicit cast to squelch the compile warning.
      */
     int cipherTextLen{static_cast<int>(cipherText.size())};
-    if (0 == EVP_DecryptUpdate(&context, &plainText[0], &workingLen, &cipherText[0], cipherTextLen)) {
+    if (0 == EVP_DecryptUpdate(&c.context_, &plainText[0], &workingLen, &cipherText[0], cipherTextLen)) {
         THROW_CRYPTO_ERROR(formattedCryptoError("Failed decrypt update"));
     }
 
     int plainTextLen{workingLen};
     std::vector<unsigned char> tagCopy(tag);
-    if (0 == EVP_CIPHER_CTX_ctrl(&context, EVP_CTRL_GCM_SET_TAG, TAG_LEN, &tagCopy[0])) {
+    if (0 == EVP_CIPHER_CTX_ctrl(&c.context_, EVP_CTRL_GCM_SET_TAG, TAG_LEN, &tagCopy[0])) {
         THROW_CRYPTO_ERROR(formattedCryptoError("Failed finalizing setting tag"));
     }
 
@@ -144,13 +164,10 @@ void basicDecryptAesGcm256_4(const std::vector<unsigned char>& key,
      * The next line without the cast would be a harmless widening conversion of an int to size_t.
      * We use an explicit static_cast<size_t> to silence the compile warning.
      */
-    if (0 == EVP_DecryptFinal_ex(&context, &plainText[static_cast<size_t>(workingLen)], &workingLen)) {
+    if (0 == EVP_DecryptFinal_ex(&c.context_, &plainText[static_cast<size_t>(workingLen)], &workingLen)) {
         THROW_CRYPTO_ERROR(formattedCryptoError("Failed finalizing decrypt plainText"));
     }
     plainTextLen += workingLen;
-    if (0 == EVP_CIPHER_CTX_cleanup(&context)) {
-        THROW_CRYPTO_ERROR(formattedCryptoError("Decrypt context cleanup failed"));
-    }
 }
 
 } // namespace null

@@ -12,6 +12,7 @@ namespace secp
 
 extern const std::string DEBUG;
 extern const std::string INFO;
+extern const std::string FATAL;
 
 void log(const std::string& type, const std::string& logEntry);
 
