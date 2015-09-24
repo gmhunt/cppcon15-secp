@@ -20,6 +20,8 @@ target_link_libraries(ex4
 
 add_executable(ex5 EXCLUDE_FROM_ALL
     BetterApp.cpp
+    Properties.cpp
+    Properties.hpp
     PropertyErrors.cpp
     PropertyErrors.hpp
     PropertyTypes.cpp
