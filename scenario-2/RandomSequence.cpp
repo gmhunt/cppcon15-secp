@@ -69,11 +69,12 @@ std::string unknownBitLengthError(const secp::Random bits)
  */
 std::vector<unsigned char> generateRandomSequence(const Random bits)
 {
-    auto keyLen = byteSize(bits);
+    unsigned len = byteSize(bits);
+    int keyLen = static_cast<int>(len);
 
-    std::vector<unsigned char> aesKey(keyLen,  0);
-    std::vector<unsigned char> aesPass(keyLen, 0);
-    std::vector<unsigned char> aesSalt(keyLen, 0);
+    std::vector<unsigned char> aesKey(32,  0);
+    std::vector<unsigned char> aesPass(len, 0);
+    std::vector<unsigned char> aesSalt(len, 0);
 
     if (0 == RAND_bytes(&aesPass[0], keyLen)) {
         std::stringstream ss;
@@ -90,17 +91,6 @@ std::vector<unsigned char> generateRandomSequence(const Random bits)
     int rc(0);
     switch (bits) {
         case Random::SIZE_96_BITS:
-        {
-            /**
-             * Even though we only need 96-bits, we need to size the aesKey to 128-bits
-             * since we are using the EVP_aes_128_cbc() algorithm.
-             */
-            unsigned keyLen128{16};
-            aesKey.resize(keyLen128);
-            rc = EVP_BytesToKey(EVP_aes_128_cbc(), EVP_sha256(), &aesSalt[0], &aesPass[0], keyLen128, 5, &aesKey[0], NULL);
-            aesKey.resize(keyLen);
-        }
-            break;
         case Random::SIZE_128_BITS:
             rc = EVP_BytesToKey(EVP_aes_128_cbc(), EVP_sha256(), &aesSalt[0], &aesPass[0], keyLen, 5, &aesKey[0], NULL);
             break;
@@ -117,7 +107,7 @@ std::vector<unsigned char> generateRandomSequence(const Random bits)
         ss << "BytesToKey failed for keylen: " << keyLen << ", error: " << lastCryptoError();
         THROW_CRYPTO_ERROR(ss.str());
     }
-
+    aesKey.resize(len);
     return aesKey;
 }
 

@@ -19,13 +19,21 @@ void printResult(const std::string& label, const IntType t)
 void uint32WrapAround()
 {
     std::cout << "Unsigned int wrap" << std::endl;
+
     std::uint32_t ui{std::numeric_limits<std::uint32_t >::max()};
+
     printResult("max unsigned", ui);
+
     ui++;
+
     printResult("wrapped (++)", ui);
+
     ui = std::numeric_limits<std::uint32_t >::min();
+
     printResult("min unsigned", ui);
+
     ui--;
+
     printResult("wrapped (--)", ui);
 }
 

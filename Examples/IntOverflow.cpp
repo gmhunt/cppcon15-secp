@@ -16,13 +16,21 @@ void printResult(const std::string& label, const IntType t)
 void int32Overflow()
 {
     std::cout << "Signed int overflow" << std::endl;
+
     std::int32_t i{std::numeric_limits<std::int32_t>::max()};
+
     printResult("max signed   ", i);
+
     i++;
+
     printResult("overflow (++)", i);
+
     i = std::numeric_limits<std::int32_t >::min();
+
     printResult("min signed   ", i);
+
     i--;
+
     printResult("overflow (--)", i);
 }
 
