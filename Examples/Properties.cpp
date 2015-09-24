@@ -160,8 +160,10 @@ void Properties::storeParsedValues()
         citerator_type citerator = valuesMap_.find(name);
         if (citerator != valuesMap_.end()) {
             std::string cmdValue =  citerator->second;
-            std::cout << "cmdValue: " << cmdValue << std::endl;
-            pair.second.setStringValue(cmdValue);
+            if (!cmdValue.empty()) {
+                std::cout << "cmdValue: " << cmdValue << std::endl;
+                pair.second.setStringValue(cmdValue);
+            }
         }
     }
 }
