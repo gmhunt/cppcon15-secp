@@ -7,32 +7,32 @@ message("Running CMAKE Module: ConfigureThirdparty")
 #		posix
 #   	win32
 #
-# - boost 1.59.0
+# - boost 1.63.0
 #       built with zlib and bzip2
 #			$ mkdir ~/boost-build
 #			$ cd ~/boost-build
-#			$ tar xvfz ~/Downloads/boost_1_59_0.tar.gz
-#			$ tar xvfz ~/Downloads/zlib-1.2.8.tar.gz
+#			$ tar xvfz ~/Downloads/boost_1_63_0.tar.gz
+#			$ tar xvfz ~/Downloads/zlib-1.2.10.tar.gz
 #			$ tar xvfz ~/Downloads/bzip2-1.0.6.tar.gz
 #           $ cd boost_1_59_0
 #
 #		clang (osx)
 #           ./bootstrap.sh
-#			./bjam --disable-icu -q --prefix=/usr/local/boost_1_59_0 --without-python \
+#			./bjam --disable-icu -q --prefix=/usr/local/boost_1_63_0 --without-python \
 #                  --without-log --without-mpi --toolset=clang-cxx11 link=static \
 #                  threading=multi variant=release address-model=64 architecture=x86 \
 #                  -sBZIP2_SOURCE=~/build-boost/bzip2-1.0.6 \
-#                  -sZLIB_SOURCE=~/build-boost/zlib-1.2.8 \
-#                  cxxflags="-std=c++11 -I../zlib-1.2.8 -I../bzip2-1.0.6" \
+#                  -sZLIB_SOURCE=~/build-boost/zlib-1.2.10 \
+#                  cxxflags="-std=c++11 -I../zlib-1.2.10 -I../bzip2-1.0.6" \
 #                  -linkflags=stdlib=libc++ install
 #   	gcc (linux)
 #           ./bootstrap.sh
-#			./bjam --disable-icu -q --prefix=/usr/local/boost_1_59_0 --without-python \
+#			./bjam --disable-icu -q --prefix=/usr/local/boost_1_63_0 --without-python \
 #                  --without-log --without-mpi --toolset=gcc link=static \
 #                  threading=multi variant=release address-model=64 architecture=x86 \
 #                  -sBZIP2_SOURCE=~/build-boost/bzip2-1.0.6 \
-#                  -sZLIB_SOURCE=~/build-boost/zlib-1.2.8 \
-#                  cxxflags="-std=c++11 -I../zlib-1.2.8 -I../bzip2-1.0.6 -Wno-unused-local-typedefs" \
+#                  -sZLIB_SOURCE=~/build-boost/zlib-1.2.10 \
+#                  cxxflags="-std=c++11 -I../zlib-1.2.10 -I../bzip2-1.0.6 -Wno-unused-local-typedefs" \
 #                  install
 #
 #
@@ -50,8 +50,8 @@ if(SECP_PLATFORM_POSIX)
 	set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 	set(Boost_USE_MULTITHREADED      ON)
 	set(Boost_USE_STATIC_RUNTIME    OFF)
-	set(BOOST_ROOT /usr/local/boost_1_59_0)
-	find_package(Boost 1.59.0)
+	set(BOOST_ROOT /usr/local/boost_1_63_0)
+	find_package(Boost 1.63.0)
 	if (Boost_FOUND)
 	    include_directories(${Boost_INCLUDE_DIRS})
 	endif()
